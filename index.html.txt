@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wongue Davy Cédric — Stagiaire Ingénieur Qualité · PARLYM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A3444;
+  --mut:#68798A;
+  --line:rgba(26,52,68,.14);
+  --panel:#142C3A;
+  --cyan:#7A99A6;
+  --navy:#1A3444;
+  --gutter:32px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{
+  background:#fff;color:var(--ink);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* HEADER */
+.site-head{
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px var(--gutter);
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:20px;height:20px;border:2px solid var(--ink);position:relative;flex-shrink:0}
+.brand-mark::after{content:'';position:absolute;inset:4px;background:var(--cyan)}
+.brand-name{font-size:11px;font-weight:600;line-height:1.15}
+.head-nav{display:flex;gap:26px;font-size:12px;font-weight:500}
+.head-nav a{color:var(--mut);position:relative}
+.head-nav a:hover{color:var(--ink)}
+.head-nav a.active{color:var(--ink);font-weight:600}
+.head-nav a.nav-highlight{
+  color:#fff;background:linear-gradient(135deg,var(--navy),var(--cyan));
+  padding:6px 14px;border-radius:99px;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.head-nav a.nav-highlight::before{
+  content:'';width:5px;height:5px;border-radius:50%;background:#fff;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{50%{opacity:.4}}
+.head-right{display:flex;align-items:center;gap:10px}
+.lang-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  height:26px;padding:0 12px;border:1px solid var(--line);
+  border-radius:99px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  font-weight:600;letter-spacing:.08em;color:var(--mut);
+}
+.lang-btn:hover{border-color:var(--ink);color:var(--ink)}
+.lang-btn .lg{opacity:.5}
+.lang-btn .lg.active{color:var(--navy);opacity:1}
+.head-icon{
+  width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.head-icon:hover{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+
+@media(max-width:820px){
+  .head-nav a:nth-child(3){display:none}
+  .head-nav{gap:16px;font-size:11px}
+}
+@media(max-width:600px){
+  :root{--gutter:20px}
+  .brand-name{display:none}
+  .head-nav a:nth-child(2){display:none}
+}
+
+/* HERO */
+.hero{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:1px solid var(--line);
+}
+.hero-left{
+  padding:60px var(--gutter) 60px var(--gutter);
+  border-right:1px solid var(--line);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.hero-left h1{
+  font-size:clamp(28px,3.6vw,44px);
+  font-weight:700;letter-spacing:-.025em;line-height:1.1;
+  max-width:16ch;
+}
+.hero-left h1 em{font-style:normal;color:var(--cyan)}
+.hero-lede{font-size:14px;color:var(--mut);margin-top:20px;max-width:44ch}
+.hero-cta{
+  display:inline-block;margin-top:24px;font-size:13px;font-weight:600;
+  border-bottom:2px solid var(--ink);padding-bottom:2px;align-self:flex-start;
+}
+.hero-cta:hover{color:var(--cyan);border-color:var(--cyan)}
+
+.hero-right{
+  background:var(--panel);color:#fff;
+  padding:60px var(--gutter);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;overflow:hidden;
+  min-height:400px;
+}
+.hero-right::before{
+  content:'';position:absolute;top:-100px;right:-100px;
+  width:340px;height:340px;border-radius:50%;
+  border:1px solid rgba(122,153,166,.25);
+}
+.hero-right::after{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:220px;height:220px;border-radius:50%;
+  border:1px solid rgba(122,153,166,.15);
+}
+.hero-name{
+  font-size:clamp(22px,2.4vw,30px);font-weight:700;
+  letter-spacing:-.025em;line-height:1.15;position:relative;z-index:1;
+}
+.hero-name em{
+  display:block;font-style:normal;font-size:11px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);
+  margin-top:8px;
+}
+.hero-meta{
+  margin-top:20px;display:flex;flex-wrap:wrap;gap:18px;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,.85);position:relative;z-index:1;
+}
+.hero-meta span{display:inline-flex;align-items:center;gap:6px}
+.hero-meta .dot{width:5px;height:5px;border-radius:50%;background:var(--cyan)}
+.hero-rule{
+  width:32px;height:2px;background:var(--cyan);margin-bottom:16px;
+  position:relative;z-index:1;
+}
+
+@media(max-width:820px){
+  .hero{grid-template-columns:1fr}
+  .hero-left{border-right:none;border-bottom:1px solid var(--line);padding:40px var(--gutter)}
+  .hero-right{min-height:300px;padding:40px var(--gutter)}
+}
+
+/* SECTIONS */
+.section{padding:70px var(--gutter);border-top:1px solid var(--line)}
+.section:first-of-type{border-top:none}
+.head-row{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:40px;margin-bottom:44px;flex-wrap:wrap;
+}
+.h-big{
+  font-size:clamp(24px,2.6vw,34px);font-weight:700;
+  letter-spacing:-.025em;line-height:1.15;max-width:22ch;
+}
+.section-lede{font-size:14px;color:var(--mut);max-width:48ch;line-height:1.7}
+
+/* CARTES PARCOURS */
+.cards-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{
+  background:var(--panel);color:#fff;padding:32px 26px;
+  min-height:280px;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:160px;height:160px;border-radius:50%;
+  border:1px solid rgba(122,153,166,.18);
+}
+.card-num{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:var(--cyan);font-weight:600;letter-spacing:.1em;
+  margin-bottom:24px;position:relative;z-index:1;
+}
+.card-title{
+  font-size:16px;font-weight:700;letter-spacing:-.01em;
+  margin-bottom:10px;position:relative;z-index:1;
+}
+.card-text{
+  font-size:12.5px;color:rgba(255,255,255,.75);
+  line-height:1.65;position:relative;z-index:1;
+}
+.card-text em{font-style:normal;color:var(--cyan);font-weight:600}
+.card-tag{
+  margin-top:auto;font-size:10px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);position:relative;z-index:1;
+}
+@media(max-width:900px){.cards-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.cards-4{grid-template-columns:1fr}}
+
+/* DEUX COLONNES */
+.two-col{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:start;
+  padding:70px var(--gutter);border-top:1px solid var(--line);
+}
+.two-col h2{
+  font-size:clamp(20px,2.2vw,28px);font-weight:700;
+  letter-spacing:-.02em;line-height:1.2;margin-bottom:20px;
+}
+.two-col > div p{font-size:13px;color:var(--mut);margin-bottom:12px;max-width:44ch}
+.two-col ul{list-style:none;margin-top:20px}
+.two-col ul li{
+  font-size:13px;padding:12px 0 12px 20px;position:relative;
+  border-bottom:1px solid var(--line);
+}
+.two-col ul li:last-child{border-bottom:none}
+.two-col ul li::before{
+  content:'';position:absolute;left:0;top:18px;
+  width:8px;height:8px;background:var(--cyan);border-radius:50%;
+}
+.two-col ul li b{font-weight:600;color:var(--ink)}
+
+@media(max-width:820px){
+  .two-col{grid-template-columns:1fr;gap:30px;padding:60px var(--gutter)}
+}
+
+/* CERTIFICATIONS */
+.cert-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+.cert-card{
+  background:#fff;border:1px solid var(--line);
+  cursor:pointer;display:flex;flex-direction:column;
+  transition:border-color .3s, box-shadow .3s;
+}
+.cert-card:hover{
+  border-color:var(--ink);
+  box-shadow:0 20px 40px -20px rgba(26,52,68,.3);
+}
+.cert-thumb{
+  aspect-ratio:4/3;background:#F4F6F7;overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.cert-thumb img{
+  width:100%;height:100%;object-fit:cover;object-position:top center;
+  filter:blur(14px) saturate(.65);
+  transition:filter .6s;
+}
+.cert-thumb.preview-visible img{filter:none}
+.cert-thumb.preview-visible .load-overlay{display:none}
+.cert-info{padding:14px;text-align:center;font-size:12px;font-weight:600}
+
+.load-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;background:rgba(255,255,255,.4);
+}
+.spinner{
+  width:24px;height:24px;border-radius:50%;
+  border:2px solid rgba(26,52,68,.15);border-top-color:var(--cyan);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-label{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--navy);font-weight:600;
+}
+@media(max-width:900px){.cert-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.cert-grid{grid-template-columns:1fr}}
+
+/* POURQUOI PARLYM */
+.why{
+  background:linear-gradient(180deg,#fff,#F4F6F7);
+  padding:90px var(--gutter);border-top:1px solid var(--line);
+}
+.why-head{
+  display:grid;grid-template-columns:1.1fr 1fr;gap:60px;
+  align-items:end;margin-bottom:56px;
+}
+.why-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:#fff;background:linear-gradient(135deg,var(--navy),var(--cyan));
+  padding:8px 16px;border-radius:99px;margin-bottom:24px;font-weight:700;
+}
+.why-label::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:#fff;
+}
+.why-title{
+  font-size:clamp(30px,4vw,52px);font-weight:700;
+  letter-spacing:-.035em;line-height:1.05;max-width:16ch;
+}
+.why-title em{font-style:normal;color:var(--cyan)}
+.why-intro{font-size:14px;color:var(--mut);line-height:1.8;max-width:50ch}
+.why-intro + .why-intro{margin-top:14px}
+.why-intro b{color:var(--ink);font-weight:600}
+
+.why-dual{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  border:1px solid var(--line);background:#fff;
+  box-shadow:0 20px 50px -30px rgba(26,52,68,.25);
+}
+.why-side{padding:48px 40px}
+.why-side .wn{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  letter-spacing:.2em;color:var(--cyan);margin-bottom:20px;font-weight:700;
+}
+.why-side .wt{
+  font-size:clamp(18px,2vw,24px);font-weight:700;
+  letter-spacing:-.02em;line-height:1.2;margin-bottom:16px;
+}
+.why-side .wd{
+  font-size:13px;color:var(--mut);line-height:1.75;max-width:44ch;
+}
+.why-tags{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px}
+.why-tags span{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:6px 12px;border:1px solid var(--line);border-radius:99px;
+  color:var(--mut);
+}
+.why-cross{
+  display:flex;align-items:center;justify-content:center;
+  width:80px;background:var(--panel);color:var(--cyan);
+  font-size:22px;font-weight:300;
+}
+@media(max-width:820px){
+  .why{padding:70px var(--gutter)}
+  .why-head{grid-template-columns:1fr;gap:24px;margin-bottom:40px}
+  .why-dual{grid-template-columns:1fr}
+  .why-cross{width:100%;height:60px}
+  .why-side{padding:34px 26px}
+}
+
+/* CONTACT */
+.contact{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;
+  padding:80px var(--gutter);border-top:1px solid var(--line);
+}
+.contact h2{
+  font-size:clamp(22px,2.4vw,30px);font-weight:700;
+  letter-spacing:-.025em;line-height:1.15;margin-bottom:16px;max-width:18ch;
+}
+.contact p{font-size:13px;color:var(--mut);max-width:42ch;line-height:1.7}
+.contact-links{display:flex;flex-direction:column;gap:14px;max-width:440px}
+.contact-field{
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--ink);padding:14px 0 12px;
+  font-size:14px;font-weight:500;
+}
+.contact-field::after{content:'↗';color:var(--mut)}
+.contact-field:hover{color:var(--cyan);border-color:var(--cyan)}
+.contact-btn{
+  display:flex;justify-content:center;align-items:center;
+  background:var(--ink);color:#fff;padding:16px;
+  font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  margin-top:8px;
+}
+.contact-btn:hover{background:var(--cyan)}
+@media(max-width:760px){.contact{grid-template-columns:1fr;gap:30px;padding:60px var(--gutter)}}
+
+/* FOOTER */
+.site-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:28px var(--gutter);border-top:1px solid var(--line);
+  font-size:11px;color:var(--mut);flex-wrap:wrap;gap:16px;
+}
+.site-foot nav{display:flex;gap:20px;flex-wrap:wrap}
+.site-foot nav a:hover{color:var(--ink)}
+@media(max-width:600px){.site-foot{flex-direction:column;text-align:center}}
+
+/* LIGHTBOX */
+.lb{
+  position:fixed;inset:0;background:rgba(20,44,58,.94);
+  display:none;align-items:center;justify-content:center;padding:24px;z-index:200;
+}
+.lb.open{display:flex}
+.lb .close{
+  position:absolute;top:20px;right:20px;
+  width:40px;height:40px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.3);background:none;color:#fff;
+  font-size:18px;cursor:pointer;
+}
+.lb .close:hover{background:var(--cyan);border-color:var(--cyan)}
+.lb .img-wrap{position:relative}
+.lb .img-wrap img{
+  display:block;max-width:90vw;max-height:80vh;
+  filter:blur(28px) saturate(.55);
+  transition:filter .6s;
+}
+.lb .img-wrap.revealed img{filter:none}
+.lb .img-wrap.revealable{cursor:pointer}
+.lb .img-wrap .load-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;background:rgba(20,44,58,.4);
+}
+.lb .img-wrap.revealed .load-overlay{display:none}
+.lb .load-label{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.2em;text-transform:uppercase;color:#fff;font-weight:600;
+}
+.lb .cap{
+  position:absolute;bottom:24px;left:0;right:0;text-align:center;
+  color:#fff;font-size:12px;letter-spacing:.1em;
+}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .7s, transform .7s}
+.rv.on{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="page-label" style="text-align:center;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);padding:20px 0 0;font-weight:500;" data-i18n="page.label">0.1 : Candidature · Stagiaire Ingénieur Qualité</div>
+
+<header class="site-head">
+  <a href="#top" class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-name">Wongue<br>Davy Cédric</div>
+  </a>
+  <nav class="head-nav">
+    <a href="#histoire" data-i18n="nav.parcours">Parcours</a>
+    <a href="#certificats" data-i18n="nav.certificats">Certifications</a>
+    <a href="#parlym" data-i18n="nav.parlym" class="nav-highlight">Pourquoi PARLYM</a>
+    <a href="#contact" data-i18n="nav.contact">Contact</a>
+  </nav>
+  <div class="head-right">
+    <button class="lang-btn" id="langBtn" type="button">
+      <span class="lg active" data-lang="fr">FR</span><span>/</span><span class="lg" data-lang="en">EN</span>
+    </button>
+    <a href="#contact" class="head-icon" title="Contact">↗</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-left">
+    <h1 data-i18n-html="hero.title">Ingénieur des procédés, qualité <em>ISO 9001</em> & Oil & Gas.</h1>
+    <p class="hero-lede" data-i18n="hero.lede">Une candidature pour le stage d'Ingénieur Qualité chez PARLYM Cameroun : déploiement du SMQ, audits internes, gestion des non-conformités et amélioration continue.</p>
+    <a href="#certificats" class="hero-cta" data-i18n="hero.link">Voir les documents</a>
+  </div>
+  <div class="hero-right">
+    <div class="hero-rule"></div>
+    <div class="hero-name">
+      Wongue Davy Cédric
+      <em data-i18n="hero.role">Stagiaire Ingénieur Qualité</em>
+    </div>
+    <div class="hero-meta">
+      <span><span class="dot"></span><span data-i18n="hero.meta1">Douala, Cameroun</span></span>
+      <span><span class="dot"></span><span data-i18n="hero.meta2">Disponible 6 mois</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- PARCOURS -->
+<section class="section" id="histoire">
+  <div class="head-row">
+    <h2 class="h-big" data-i18n-html="parcours.title">Quatre piliers pour la qualité.</h2>
+    <p class="section-lede rv" data-i18n="parcours.lede">Diplômé ingénieur des procédés (2025), formé au management de la qualité et certifié en production et traitement du gaz naturel. Un profil construit pour déployer, auditer et améliorer un système qualité dans l'industrie pétrolière et gazière.</p>
+  </div>
+
+  <div class="cards-4">
+    <article class="card">
+      <div class="card-num">01</div>
+      <div class="card-title" data-i18n="card1.name">L'exigence</div>
+      <p class="card-text" data-i18n-html="card1.intro">Un système qualité n'est pas un classeur : c'est une <em>discipline quotidienne</em> qui protège les opérations, les hommes et les délais.</p>
+      <div class="card-tag" data-i18n="card1.sub">Pourquoi la qualité ?</div>
+    </article>
+    <article class="card">
+      <div class="card-num">02</div>
+      <div class="card-title" data-i18n="card2.name">Le contrôle</div>
+      <p class="card-text" data-i18n-html="card2.intro">Auditer un processus, tracer une non-conformité, sécuriser une donnée : <em>les gestes du terrain sont ceux de l'assurance qualité.</em></p>
+      <div class="card-tag" data-i18n="card2.sub">Audits & non-conformités</div>
+    </article>
+    <article class="card">
+      <div class="card-num">03</div>
+      <div class="card-title" data-i18n="card3.name">Les outils</div>
+      <p class="card-text" data-i18n-html="card3.intro">ISO 9001:2015, Excel, reporting : des outils qui transforment une exigence normative en <em>processus documenté, mesurable et partageable.</em></p>
+      <div class="card-tag" data-i18n="card3.sub">ISO 9001 · Excel · reporting</div>
+    </article>
+    <article class="card">
+      <div class="card-num">04</div>
+      <div class="card-title" data-i18n="card4.name">Le cap</div>
+      <p class="card-text" data-i18n-html="card4.intro">Oil & Gas, un secteur qui ne laisse aucune place à l'approximation : <em>rigueur, méthode, anglais technique.</em></p>
+      <div class="card-tag" data-i18n="card4.sub">Oil & Gas · ISO 9001</div>
+    </article>
+  </div>
+</section>
+
+<!-- TERRAIN -->
+<section class="two-col">
+  <div>
+    <h2 data-i18n="terrain.title">Le terrain. Cinq expériences industrielles, un même réflexe : vérifier.</h2>
+    <p data-i18n="terrain.p">De la standardisation des procédés au contrôle qualité, j'ai appris à lire un dossier technique, à suivre un écart, à rédiger une non-conformité et à produire un reporting exploitable.</p>
+    <ul>
+      <li data-i18n-html="terrain.li1"><b>Standardisation de procédés</b>, 3 postes formalisés (SOP, points de contrôle), gains mesurés : recyclage +40 %, arrêts −15 %.</li>
+      <li data-i18n-html="terrain.li2"><b>Accompagnement d'unités de production</b>, 04 sites appuyés (procédures, plans de maîtrise), variabilité réduite de 18 %.</li>
+      <li data-i18n-html="terrain.li3"><b>Bilans matière et énergie</b>, suivi d'indicateurs, compromis stabilité/coût amélioré de 12 %.</li>
+      <li data-i18n-html="terrain.li4"><b>Contrôles qualité et conformité</b>, suivi QHSE, analyse des causes racines (Ishikawa).</li>
+    </ul>
+  </div>
+  <div>
+    <h2 data-i18n="outils.title">Les outils. ISO 9001 côté norme, Excel côté analyse.</h2>
+    <p data-i18n="outils.p">Les compétences attendues pour déployer un système de management de la qualité, auditer des processus, suivre des non-conformités et produire un reporting clair, sans jargon.</p>
+    <ul>
+      <li data-i18n-html="outils.li1"><b>ISO 9001:2015</b> : déploiement, audit interne, amélioration continue</li>
+      <li data-i18n-html="outils.li2"><b>Oil & Gas</b> : production et traitement du gaz naturel (L&T Edutech)</li>
+      <li data-i18n-html="outils.li3"><b>Excel</b> : suivi d'indicateurs, tableaux de bord, gap analysis</li>
+      <li data-i18n-html="outils.li4"><b>Anglais technique</b> : C1, rédaction et communication professionnelle</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section class="section" id="certificats">
+  <div class="head-row">
+    <h2 class="h-big" data-i18n-html="certs.title">Certifications clés.</h2>
+    <p class="section-lede rv" data-i18n-html="certs.lede">Diplôme, certification Oil & Gas et niveau d'anglais : les preuves vérifiables directement alignées sur l'offre PARLYM.</p>
+  </div>
+  <div class="cert-grid" id="certGrid">
+    <div class="cert-empty" id="certEmpty" data-i18n="certs.loading">Chargement des documents…</div>
+  </div>
+</section>
+
+<!-- POURQUOI PARLYM -->
+<section class="why" id="parlym">
+  <div class="why-head">
+    <div>
+      <div class="why-label" data-i18n="why.label">Pourquoi PARLYM ?</div>
+      <h2 class="why-title" data-i18n-html="why.title">Là où l'ingénierie des procédés rencontre <em>la qualité opérationnelle.</em></h2>
+    </div>
+    <div>
+      <p class="why-intro" data-i18n-html="why.intro">Chez PARLYM, mes deux forces se rejoignent : la <b>rigueur industrielle</b> apprise sur les procédés et la <b>discipline qualité</b> que je veux déployer au quotidien.</p>
+      <p class="why-intro" data-i18n-html="why.intro2">50 ans d'expertise, des projets stratégiques en Oil & Gas, une filiale camerounaise à taille humaine qui monte en puissance : le cadre exact pour transformer un stage de 6 mois en tremplin long terme.</p>
+    </div>
+  </div>
+
+  <div class="why-dual">
+    <div class="why-side">
+      <div class="wn">01</div>
+      <div class="wt" data-i18n-html="why.left.title">Ingénierie & procédés</div>
+      <div class="wd" data-i18n="why.left.desc">Standardisation, bilans matière et énergie, contrôle des opérations : les gestes que j'ai pratiqués sur le terrain et qui m'ont appris à lire un processus, suivre un écart et sécuriser une donnée.</div>
+      <div class="why-tags">
+        <span>Procédés</span>
+        <span>Standardisation</span>
+        <span>Conformité</span>
+      </div>
+    </div>
+    <div class="why-cross">+</div>
+    <div class="why-side">
+      <div class="wn">02</div>
+      <div class="wt" data-i18n-html="why.right.title">Qualité & Oil Gas</div>
+      <div class="wd" data-i18n="why.right.desc">ISO 9001:2015, audits internes, gestion des non-conformités, amélioration continue : les compétences que je veux mobiliser chez PARLYM pour faire vivre le SMQ au plus près des projets.</div>
+      <div class="why-tags">
+        <span>ISO 9001</span>
+        <span>Audits</span>
+        <span>Non-conformités</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div>
+    <h2 data-i18n="contact.title">Prêt à rejoindre PARLYM Cameroun.</h2>
+    <p data-i18n="contact.p">Disponible pour le stage d'Ingénieur Qualité à Douala (6 mois) : déploiement du SMQ, audits et surveillance des processus, assurance qualité opérationnelle, gestion des non-conformités.</p>
+  </div>
+  <div class="contact-links">
+    <a href="tel:+237698385430" class="contact-field"><span>+237 698 385 430</span></a>
+    <a href="mailto:davycedricw@outlook.com" class="contact-field"><span>davycedricw@outlook.com</span></a>
+    <a href="cv-wongue-davy-cedric.pdf" class="contact-btn" download><span data-i18n="contact.btn">Télécharger le CV PDF</span></a>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div>© 2026 Wongue Davy Cédric</div>
+  <nav>
+    <a href="#histoire" data-i18n="nav.parcours">Parcours</a>
+    <a href="#certificats" data-i18n="nav.certificats">Certifications</a>
+    <a href="#parlym" data-i18n="nav.parlym">Pourquoi PARLYM</a>
+    <a href="#contact" data-i18n="nav.contact">Contact</a>
+  </nav>
+</footer>
+
+<div class="lb" id="lightbox">
+  <button class="close" id="lbClose" type="button">×</button>
+  <div id="lbContent"></div>
+  <div class="cap" id="lbCap"></div>
+</div>
+
+<script>
+/* ============================================================
+   TRADUCTIONS
+   ============================================================ */
+var I18N = {
+  fr: {
+    'page.label': '0.1 : Candidature · Stagiaire Ingénieur Qualité',
+    'nav.parcours': 'Parcours',
+    'nav.certificats': 'Certifications',
+    'nav.parlym': 'Pourquoi PARLYM',
+    'nav.contact': 'Contact',
+    'hero.title': 'Ingénieur des procédés, qualité <em>ISO 9001</em> & Oil & Gas.',
+    'hero.lede': "Une candidature pour le stage d'Ingénieur Qualité chez PARLYM Cameroun : déploiement du SMQ, audits internes, gestion des non-conformités et amélioration continue.",
+    'hero.link': 'Voir les documents',
+    'hero.role': 'Stagiaire Ingénieur Qualité',
+    'hero.meta1': 'Douala, Cameroun',
+    'hero.meta2': 'Disponible 6 mois',
+    'parcours.title': 'Quatre piliers pour la qualité.',
+    'parcours.lede': "Diplômé ingénieur des procédés (2025), formé au management de la qualité et certifié en production et traitement du gaz naturel. Un profil construit pour déployer, auditer et améliorer un système qualité dans l'industrie pétrolière et gazière.",
+    'card1.intro': "Un système qualité n'est pas un classeur : c'est une <em>discipline quotidienne</em> qui protège les opérations, les hommes et les délais.",
+    'card1.name': "L'exigence", 'card1.sub': 'Pourquoi la qualité ?',
+    'card2.intro': "Auditer un processus, tracer une non-conformité, sécuriser une donnée : <em>les gestes du terrain sont ceux de l'assurance qualité.</em>",
+    'card2.name': 'Le contrôle', 'card2.sub': 'Audits & non-conformités',
+    'card3.intro': "ISO 9001:2015, Excel, reporting : des outils qui transforment une exigence normative en <em>processus documenté, mesurable et partageable.</em>",
+    'card3.name': 'Les outils', 'card3.sub': 'ISO 9001 · Excel · reporting',
+    'card4.intro': "Oil & Gas, un secteur qui ne laisse aucune place à l'approximation : <em>rigueur, méthode, anglais technique.</em>",
+    'card4.name': 'Le cap', 'card4.sub': 'Oil & Gas · ISO 9001',
+    'terrain.title': 'Le terrain. Cinq expériences industrielles, un même réflexe : vérifier.',
+    'terrain.p': "De la standardisation des procédés au contrôle qualité, j'ai appris à lire un dossier technique, à suivre un écart, à rédiger une non-conformité et à produire un reporting exploitable.",
+    'terrain.li1': '<b>Standardisation de procédés</b>, 3 postes formalisés (SOP, points de contrôle), gains mesurés : recyclage +40 %, arrêts −15 %.',
+    'terrain.li2': "<b>Accompagnement d'unités de production</b>, 04 sites appuyés (procédures, plans de maîtrise), variabilité réduite de 18 %.",
+    'terrain.li3': '<b>Bilans matière et énergie</b>, suivi d\'indicateurs, compromis stabilité/coût amélioré de 12 %.',
+    'terrain.li4': '<b>Contrôles qualité et conformité</b>, suivi QHSE, analyse des causes racines (Ishikawa).',
+    'outils.title': 'Les outils. ISO 9001 côté norme, Excel côté analyse.',
+    'outils.p': "Les compétences attendues pour déployer un système de management de la qualité, auditer des processus, suivre des non-conformités et produire un reporting clair, sans jargon.",
+    'outils.li1': '<b>ISO 9001:2015</b> : déploiement, audit interne, amélioration continue',
+    'outils.li2': '<b>Oil & Gas</b> : production et traitement du gaz naturel (L&T Edutech)',
+    'outils.li3': "<b>Excel</b> : suivi d'indicateurs, tableaux de bord, gap analysis",
+    'outils.li4': '<b>Anglais technique</b> : C1, rédaction et communication professionnelle',
+    'certs.title': 'Certifications clés.',
+    'certs.lede': "Diplôme, certification Oil & Gas et niveau d'anglais : les preuves vérifiables directement alignées sur l'offre PARLYM.",
+    'certs.loading': 'Chargement des documents…',
+    'why.label': 'Pourquoi PARLYM ?',
+    'why.title': "Là où l'ingénierie des procédés rencontre <em>la qualité opérationnelle.</em>",
+    'why.intro': "Chez PARLYM, mes deux forces se rejoignent : la <b>rigueur industrielle</b> apprise sur les procédés et la <b>discipline qualité</b> que je veux déployer au quotidien.",
+    'why.intro2': "50 ans d'expertise, des projets stratégiques en Oil & Gas, une filiale camerounaise à taille humaine qui monte en puissance : le cadre exact pour transformer un stage de 6 mois en tremplin long terme.",
+    'why.left.title': 'Ingénierie & procédés',
+    'why.left.desc': "Standardisation, bilans matière et énergie, contrôle des opérations : les gestes que j'ai pratiqués sur le terrain et qui m'ont appris à lire un processus, suivre un écart et sécuriser une donnée.",
+    'why.right.title': 'Qualité & Oil Gas',
+    'why.right.desc': "ISO 9001:2015, audits internes, gestion des non-conformités, amélioration continue : les compétences que je veux mobiliser chez PARLYM pour faire vivre le SMQ au plus près des projets.",
+    'contact.title': 'Prêt à rejoindre PARLYM Cameroun.',
+    'contact.p': "Disponible pour le stage d'Ingénieur Qualité à Douala (6 mois) : déploiement du SMQ, audits et surveillance des processus, assurance qualité opérationnelle, gestion des non-conformités.",
+    'contact.btn': 'Télécharger le CV PDF',
+    'soon.title': 'Aperçu en cours de mise à jour',
+    'soon.long': 'Aperçu en cours de mise à jour',
+    'preview.loading': "Chargement de l'aperçu…",
+    'doc.diplome': "Diplôme d'ingénieur des procédés, Université Catholique Saint-Jérôme de Douala",
+    'doc.c1english': "Certificat d'anglais niveau C1",
+    'doc.gas': 'Natural Gas Production and Processing, L&T Edutech'
+  },
+  en: {
+    'page.label': '0.1 : Application · Quality Engineer Intern',
+    'nav.parcours': 'Journey',
+    'nav.certificats': 'Certifications',
+    'nav.parlym': 'Why PARLYM',
+    'nav.contact': 'Contact',
+    'hero.title': 'Process Engineer, Quality <em>ISO 9001</em> & Oil & Gas.',
+    'hero.lede': "An application for the Quality Engineer Internship at PARLYM Cameroon: QMS deployment, internal audits, non-conformity management and continuous improvement.",
+    'hero.link': 'View documents',
+    'hero.role': 'Quality Engineer Intern',
+    'hero.meta1': 'Douala, Cameroon',
+    'hero.meta2': 'Available 6 months',
+    'parcours.title': 'Four pillars for quality.',
+    'parcours.lede': "Process engineering graduate (2025), trained in quality management and certified in natural gas production and processing. A profile built to deploy, audit and improve a quality system in the oil and gas industry.",
+    'card1.intro': "A quality system is not a binder: it is a <em>daily discipline</em> that protects operations, people and deadlines.",
+    'card1.name': 'Rigour', 'card1.sub': 'Why quality?',
+    'card2.intro': "Auditing a process, tracing a non-conformity, securing data: <em>the gestures of the field are those of quality assurance.</em>",
+    'card2.name': 'Control', 'card2.sub': 'Audits & non-conformities',
+    'card3.intro': "ISO 9001:2015, Excel, reporting: tools that turn a normative requirement into a <em>documented, measurable and shareable process.</em>",
+    'card3.name': 'The tools', 'card3.sub': 'ISO 9001 · Excel · reporting',
+    'card4.intro': "Oil & Gas, a sector with no room for approximation: <em>rigour, method, technical English.</em>",
+    'card4.name': 'The goal', 'card4.sub': 'Oil & Gas · ISO 9001',
+    'terrain.title': 'The field. Five industrial experiences, one same reflex: verify.',
+    'terrain.p': "From process standardisation to quality control, I learned to read a technical file, track a variance, write a non-conformity and produce actionable reporting.",
+    'terrain.li1': '<b>Process standardisation</b>, 3 positions formalised (SOPs, control points), measured gains: recycling +40%, downtime −15%.',
+    'terrain.li2': '<b>Production units support</b>, 04 sites supported (procedures, control plans), variability reduced by 18%.',
+    'terrain.li3': '<b>Mass and energy balances</b>, KPI tracking, stability/cost trade-off improved by 12%.',
+    'terrain.li4': '<b>Quality and compliance controls</b>, QHSE monitoring, root cause analysis (Ishikawa).',
+    'outils.title': 'The tools. ISO 9001 on the norm side, Excel on the analysis side.',
+    'outils.p': "The skills expected to deploy a quality management system, audit processes, track non-conformities and produce clear reporting, without jargon.",
+    'outils.li1': '<b>ISO 9001:2015</b>: deployment, internal audit, continuous improvement',
+    'outils.li2': '<b>Oil & Gas</b>: natural gas production and processing (L&T Edutech)',
+    'outils.li3': '<b>Excel</b>: KPI tracking, dashboards, gap analysis',
+    'outils.li4': '<b>Technical English</b>: C1, professional writing and communication',
+    'certs.title': 'Key certifications.',
+    'certs.lede': "Degree, Oil & Gas certification and English level: the verifiable evidence directly aligned with the PARLYM offer.",
+    'certs.loading': 'Loading documents…',
+    'why.label': 'Why PARLYM?',
+    'why.title': 'Where process engineering meets <em>operational quality.</em>',
+    'why.intro': "At PARLYM, my two strengths come together: the <b>industrial rigour</b> learned on processes and the <b>quality discipline</b> I want to deploy every day.",
+    'why.intro2': "50 years of expertise, strategic Oil & Gas projects, a human-sized Cameroonian subsidiary scaling up: the exact setting to turn a 6-month internship into a long-term springboard.",
+    'why.left.title': 'Engineering & processes',
+    'why.left.desc': "Standardisation, mass and energy balances, operational control: the gestures I practised in the field and that taught me to read a process, track a variance and secure data.",
+    'why.right.title': 'Quality & Oil Gas',
+    'why.right.desc': "ISO 9001:2015, internal audits, non-conformity management, continuous improvement: the skills I want to mobilise at PARLYM to keep the QMS alive, close to the projects.",
+    'contact.title': 'Ready to join PARLYM Cameroon.',
+    'contact.p': "Available for the Quality Engineer Internship in Douala (6 months): QMS deployment, process audits and surveillance, operational quality assurance, non-conformity management.",
+    'contact.btn': 'Download CV PDF',
+    'soon.title': 'Preview being updated',
+    'soon.long': 'Preview being updated',
+    'preview.loading': 'Loading preview…',
+    'doc.diplome': "Process Engineering Degree, Université Catholique Saint-Jérôme de Douala",
+    'doc.c1english': 'English Certificate Level C1',
+    'doc.gas': 'Natural Gas Production and Processing, L&T Edutech'
+  }
+};
+
+var currentLang = 'fr';
+
+function t(key){
+  return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.fr[key]) || key;
+}
+
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var v = t(el.getAttribute('data-i18n'));
+    if(v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+    var v = t(el.getAttribute('data-i18n-html'));
+    if(v) el.innerHTML = v;
+  });
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('.lang-btn .lg').forEach(function(s){
+    s.classList.toggle('active', s.getAttribute('data-lang') === currentLang);
+  });
+  if(typeof renderCerts === 'function') renderCerts();
+}
+
+function setLang(lang){
+  if(lang !== 'fr' && lang !== 'en') return;
+  currentLang = lang;
+  try{ localStorage.setItem('wd_lang', lang); }catch(e){}
+  applyTranslations();
+}
+
+document.getElementById('langBtn').addEventListener('click', function(){
+  setLang(currentLang === 'fr' ? 'en' : 'fr');
+});
+
+(function(){
+  try{
+    var s = localStorage.getItem('wd_lang');
+    if(s === 'en' || s === 'fr') currentLang = s;
+  }catch(e){}
+  if(currentLang !== 'fr') applyTranslations();
+})();
+
+/* ============================================================
+   NAV ACTIVE
+   ============================================================ */
+(function(){
+  var links = document.querySelectorAll('.head-nav a');
+  var sections = [];
+  links.forEach(function(a){
+    var id = a.getAttribute('href');
+    if(id && id.startsWith('#')){
+      var s = document.querySelector(id);
+      if(s) sections.push({el:s, link:a});
+    }
+  });
+  function update(){
+    var y = window.scrollY + 120;
+    var cur = null;
+    sections.forEach(function(s){ if(s.el.offsetTop <= y) cur = s; });
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if(cur) cur.link.classList.add('active');
+  }
+  window.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('on'); } });
+}, {threshold:.12});
+document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+/* ============================================================
+   CERTIFICATS
+   ============================================================ */
+var renderCerts;
+
+(function(){
+  var DOCUMENTS = [
+    {key:'doc.diplome',   type:'image/jpeg', data:'diplome-ingenieur-wongue-davy-cedric.jpg', revealable:true},
+    {key:'doc.c1english', type:'image/jpeg', data:'certificat-c1-anglais.jpg',                revealable:true},
+    {key:'doc.gas',       type:'image/jpeg', data:'certificat-natural-gas-lt-edutech.jpg',    revealable:false}
+  ];
+  var grid = document.getElementById('certGrid');
+  var empty = document.getElementById('certEmpty');
+  var lb = document.getElementById('lightbox');
+  var lbContent = document.getElementById('lbContent');
+  var lbCap = document.getElementById('lbCap');
+  var lbClose = document.getElementById('lbClose');
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function soonBox(){
+    return '<div class="load-overlay" style="position:static;padding:20px;background:transparent">'+
+      '<b style="font-size:11px;color:var(--navy)">'+t('soon.title')+'</b></div>';
+  }
+  function loadOverlay(){
+    return '<div class="load-overlay"><div class="spinner"></div><div class="load-label">'+t('preview.loading')+'</div></div>';
+  }
+
+  renderCerts = function(){
+    Array.prototype.slice.call(grid.children).forEach(function(c){
+      if(c !== empty) grid.removeChild(c);
+    });
+    if(DOCUMENTS.length === 0){ empty.style.display=''; empty.textContent=t('certs.loading'); return; }
+    empty.style.display = 'none';
+
+    DOCUMENTS.forEach(function(c, idx){
+      var name = t(c.key);
+      var card = document.createElement('div');
+      card.className = 'cert-card rv';
+      card.addEventListener('click', function(){ openLightbox(idx); });
+
+      var thumb = document.createElement('div');
+      thumb.className = c.revealable ? 'cert-thumb preview-visible' : 'cert-thumb';
+
+      if(c.type.indexOf('pdf') === 0){
+        thumb.innerHTML = soonBox();
+      } else {
+        var img = document.createElement('img');
+        img.src = c.data; img.alt = name; img.loading = 'lazy';
+        img.onerror = function(){ thumb.innerHTML = soonBox(); };
+        thumb.appendChild(img);
+        if(!c.revealable){
+          thumb.insertAdjacentHTML('beforeend', loadOverlay());
+        }
+      }
+
+      var info = document.createElement('div');
+      info.className = 'cert-info';
+      info.innerHTML = esc(name);
+
+      card.appendChild(thumb); card.appendChild(info);
+      grid.appendChild(card);
+      io.observe(card);
+    });
+  };
+
+  function openLightbox(idx){
+    var c = DOCUMENTS[idx];
+    var name = t(c.key);
+    lbContent.innerHTML = '';
+
+    if(c.type.indexOf('pdf') === 0){
+      var iframe = document.createElement('iframe');
+      iframe.src = c.data;
+      iframe.style.cssText = 'width:min(900px,92vw);height:82vh;background:#fff;border:0';
+      lbContent.appendChild(iframe);
+    } else {
+      var wrap = document.createElement('div');
+      wrap.className = c.revealable ? 'img-wrap revealable' : 'img-wrap';
+
+      var img = document.createElement('img');
+      img.src = c.data; img.alt = name;
+      img.onerror = function(){
+        lbContent.innerHTML = '<div style="color:#fff;padding:24px;text-align:center">'+t('soon.long')+'</div>';
+      };
+      wrap.appendChild(img);
+      wrap.insertAdjacentHTML('beforeend', loadOverlay());
+
+      if(c.revealable){
+        wrap.addEventListener('click', function(){
+          wrap.classList.add('revealed');
+        });
+      }
+      lbContent.appendChild(wrap);
+    }
+    lbCap.textContent = name;
+    lb.classList.add('open');
+  }
+
+  function closeLightbox(){
+    lb.classList.remove('open');
+    lbContent.innerHTML = '';
+  }
+
+  lbClose.addEventListener('click', closeLightbox);
+  lb.addEventListener('click', function(e){ if(e.target === lb) closeLightbox(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLightbox(); });
+
+  renderCerts();
+})();
+</script>
+</body>
+</html>
