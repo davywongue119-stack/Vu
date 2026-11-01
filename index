@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BusinessPlan Pro — Générateur de Business Plan</title>
+
+<!-- Bibliothèques externes -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --sidebar: #0f172a;
+  --sidebar-text: #cbd5e1;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.loading { padding: 40px; text-align: center; color: var(--text-light); }
+
+/* Layout */
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 250px; background: var(--sidebar); color: var(--sidebar-text);
+  padding: 20px 0; position: fixed; top: 0; bottom: 0; left: 0;
+  display: flex; flex-direction: column; z-index: 10;
+}
+.sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo h1 { font-size: 18px; color: #fff; }
+.sidebar-logo span { color: var(--primary); }
+.sidebar-logo small { color: var(--sidebar-text); font-size: 11px; }
+.sidebar-nav { padding: 20px 10px; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 15px; margin-bottom: 4px;
+  color: var(--sidebar-text); text-decoration: none;
+  border-radius: 8px; cursor: pointer; font-size: 13px;
+  transition: background 0.2s;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-item.active { background: var(--primary); color: #fff; }
+.nav-item.disabled { opacity: 0.4; pointer-events: none; }
+
+.main {
+  margin-left: 250px; flex: 1; padding: 24px 32px;
+  max-width: calc(100% - 250px);
+}
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
+.topbar h2 { font-size: 22px; }
+.topbar-info { font-size: 12px; color: var(--text-light); }
+
+/* Cards */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px;
+}
+.card h3 { font-size: 15px; margin-bottom: 14px; color: var(--text); }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+
+.kpi {
+  background: var(--card); padding: 16px; border-radius: var(--radius);
+  box-shadow: var(--shadow); border-left: 4px solid var(--primary);
+}
+.kpi-label { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
+.kpi-value { font-size: 18px; font-weight: 600; }
+.kpi.success { border-left-color: var(--success); }
+.kpi.warning { border-left-color: var(--warning); }
+.kpi.danger { border-left-color: var(--danger); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500;
+  transition: all 0.15s; text-decoration: none;
+}
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); color: #fff; }
+.btn-success { background: var(--success); border-color: var(--success); color: #fff; }
+.btn-success:hover { background: #059669; color: #fff; }
+.btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn-danger:hover { background: #dc2626; color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Forms */
+.form-group { margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+label .req { color: var(--danger); }
+input, select, textarea {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 13px; font-family: inherit;
+  background: #fff; color: var(--text);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+textarea { resize: vertical; min-height: 80px; }
+.hint { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+/* Progress */
+.progress-steps { display: flex; gap: 6px; margin-bottom: 20px; }
+.step-pill {
+  flex: 1; height: 6px; border-radius: 3px; background: var(--border);
+  transition: background 0.2s;
+}
+.step-pill.active { background: var(--primary); }
+.step-pill.done { background: var(--success); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: #f1f5f9; font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-light); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.total td { font-weight: 600; background: #f8fafc; }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 500;
+}
+.badge.success { background: #dcfce7; color: #166534; }
+.badge.warning { background: #fef3c7; color: #92400e; }
+.badge.danger { background: #fee2e2; color: #991b1b; }
+.badge.info { background: #dbeafe; color: #1e40af; }
+
+/* Project cards */
+.project-card {
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.project-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.project-card h4 { font-size: 15px; margin-bottom: 4px; }
+.project-card .meta { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+.project-card .actions { display: flex; gap: 6px; margin-top: 12px; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  padding: 20px;
+}
+.modal {
+  background: #fff; border-radius: var(--radius); max-width: 900px; width: 100%;
+  max-height: 90vh; overflow-y: auto; padding: 24px;
+  box-shadow: var(--shadow-lg);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-body { margin-bottom: 20px; }
+
+/* Document preview */
+.doc-content { font-size: 13px; line-height: 1.6; }
+.doc-content h1 { font-size: 22px; margin: 20px 0 12px; color: var(--primary-dark); }
+.doc-content h2 { font-size: 16px; margin: 16px 0 8px; color: var(--text); }
+.doc-content h3 { font-size: 14px; margin: 12px 0 6px; }
+.doc-content p { margin-bottom: 10px; }
+.doc-content ul { margin-left: 20px; margin-bottom: 10px; }
+.doc-content li { margin-bottom: 4px; }
+.doc-content table { margin-bottom: 16px; }
+.doc-content .info { background: var(--primary-light); padding: 10px 14px; border-radius: 6px; margin: 12px 0; font-size: 12px; }
+
+/* Charts */
+.chart-container { position: relative; height: 280px; margin: 12px 0; }
+
+/* Alerts */
+.alert {
+  padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.alert-warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+.alert-danger { background: #fef2f2; border-left: 4px solid var(--danger); }
+.alert-info { background: #eff6ff; border-left: 4px solid var(--primary); }
+.alert-success { background: #f0fdf4; border-left: 4px solid var(--success); }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 40px; color: var(--text-light); }
+.empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text); }
+
+/* Utility */
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.flex { display: flex; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.justify-between { justify-content: space-between; }
+.align-center { align-items: center; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+@media (max-width: 900px) {
+  .sidebar { width: 70px; }
+  .sidebar-logo h1, .nav-item span, .sidebar-logo small { display: none; }
+  .main { margin-left: 70px; padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="loading">Chargement de l'application...</div>
+</div>
+
+<script>
+/* =========================================================
+   BusinessPlan Pro — Application monopage
+   ========================================================= */
+
+/* ---------- 1. PERSISTANCE INDEXEDDB ---------- */
+const DB_NAME = 'BusinessPlanPro';
+const DB_VERSION = 1;
+const STORE = 'projects';
+let _dbPromise;
+
+function openDB() {
+  if (_dbPromise) return _dbPromise;
+  _dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return _dbPromise;
+}
+async function saveProject(project) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(project);
+    tx.oncomplete = () => resolve(project);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function getProject(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function getAllProjects() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function deleteProject(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/* ---------- 2. MOTEUR DE CALCUL FINANCIER ---------- */
+const Finance = {
+  params: {
+    taxRate: 0.33,
+    vatRate: 0.1925,
+    discountRate: 0.15,
+    loanRate: 0.12,
+    loanDuration: 5,
+    deprecRates: { construction: 0.05, equipment: 0.20, furniture: 0.10, it: 0.333, vehicle: 0.20 }
+  },
+  amortize(principal, rate, years) {
+    if (!principal || !years || principal <= 0) return [];
+    const schedule = [];
+    if (rate === 0) {
+      const annual = principal / years;
+      for (let y = 1; y <= years; y++) {
+        schedule.push({ year: y, payment: annual, interest: 0, principal: annual, balance: Math.max(0, principal - annual * y) });
+      }
+      return schedule;
+    }
+    const annual = principal * rate / (1 - Math.pow(1 + rate, -years));
+    let balance = principal;
+    for (let y = 1; y <= years; y++) {
+      const interest = balance * rate;
+      const p = annual - interest;
+      balance -= p;
+      schedule.push({ year: y, payment: annual, interest, principal: p, balance: Math.max(0, balance) });
+    }
+    return schedule;
+  },
+  irr(cfs) {
+    let guess = 0.1;
+    for (let i = 0; i < 100; i++) {
+      const npv = cfs.reduce((a, cf, t) => a + cf / Math.pow(1 + guess, t), 0);
+      const dnpv = cfs.reduce((a, cf, t) => a - t * cf / Math.pow(1 + guess, t + 1), 0);
+      if (Math.abs(npv) < 1) return guess;
+      if (dnpv === 0) break;
+      const next = guess - npv / dnpv;
+      if (!isFinite(next) || next <= -0.99) return NaN;
+      guess = next;
+    }
+    return isNaN(guess) ? NaN : guess;
+  },
+  compute(data) {
+    const { investments: inv = {}, financing: fin = {}, revenue: rev = {}, operating: op = {}, fiscal: fis = {}, scenario = 'realistic' } = data;
+    const scenarioMult = { prudent: 0.7, realistic: 1.0, optimistic: 1.3 }[scenario] ?? 1.0;
+
+    const invTotal = Object.values(inv).reduce((a, b) => a + (+b || 0), 0);
+
+    const depreciation = [];
+    for (let y = 0; y < 5; y++) {
+      let d = 0;
+      for (const [k, rate] of Object.entries(this.params.deprecRates)) {
+        const base = +inv[k] || 0;
+        const duration = rate > 0 ? Math.ceil(1 / rate) : 0;
+        if (duration > 0 && y < duration) d += base * rate;
+      }
+      if (y === 0) d += (+inv.fees || 0) + (+inv.launch || 0);
+      depreciation.push(d);
+    }
+
+    const equity = +fin.equity || 0;
+    const loan = +fin.loan || 0;
+    const other = +fin.other || 0;
+    const finTotal = equity + loan + other;
+    const financingGap = invTotal - finTotal;
+
+    const loanRate = fin.loanRate ?? this.params.loanRate;
+    const loanDuration = fin.loanDuration ?? this.params.loanDuration;
+    const amortization = this.amortize(loan, loanRate, loanDuration);
+
+    const baseRev = (+rev.year1 || 0) * scenarioMult;
+    const growth = +rev.growth || 0;
+    const revenues = [];
+    for (let y = 0; y < 5; y++) revenues.push(baseRev * Math.pow(1 + growth, y));
+
+    const matPct = +op.materialPct ?? 0.35;
+    const salaries = (+op.salaries || 0) * 12;
+    const rent = (+op.rent || 0) * 12;
+    const utilities = (+op.utilities || 0) * 12;
+    const transport = (+op.transport || 0) * 12;
+    const marketing = (+op.marketing || 0) * 12;
+    const taxes = +op.taxes || 0;
+    const fixedCosts = salaries + rent + utilities + transport + marketing + taxes;
+
+    const pl = [];
+    for (let y = 0; y < 5; y++) {
+      const ca = revenues[y];
+      const mat = ca * matPct;
+      const margin = ca - mat;
+      const ebe = margin - fixedCosts;
+      const deprec = depreciation[y] || 0;
+      const interest = amortization[y]?.interest || 0;
+      const beforeTax = ebe - deprec - interest;
+      const taxRate = +fis.taxRate ?? this.params.taxRate;
+      const tax = beforeTax > 0 ? beforeTax * taxRate : 0;
+      pl.push({
+        year: y + 1, revenue: ca, materials: mat, margin, salaries, rent, utilities,
+        transport, marketing, taxes, ebe, depreciation: deprec, interest,
+        beforeTax, tax, netIncome: beforeTax - tax
+      });
+    }
+
+    const cashFlows = pl.map(p => p.netIncome + p.depreciation);
+    const allCfs = [-invTotal, ...cashFlows];
+
+    const discountRate = +fis.discountRate ?? this.params.discountRate;
+    const npv = allCfs.reduce((a, cf, t) => a + cf / Math.pow(1 + discountRate, t), 0);
+    const irr = this.irr(allCfs);
+
+    let cumul = 0, payback = null;
+    for (let i = 0; i < allCfs.length; i++) {
+      cumul += allCfs[i];
+      if (i > 0 && cumul >= 0) { payback = i; break; }
+    }
+
+    const contributionMargin = 1 - matPct;
+    const breakEven = contributionMargin > 0 ? (fixedCosts + (depreciation[0] || 0) + (amortization[0]?.interest || 0)) / contributionMargin : 0;
+    const breakEvenDay = revenues[0] > 0 ? Math.round(breakEven / revenues[0] * 365) : 0;
+
+    const bfr = revenues[0] * (30 / 365);
+
+    const monthlyCash = [];
+    for (let m = 0; m < 12; m++) {
+      const monthlyRev = revenues[0] / 12;
+      const monthlyExp = (revenues[0] * matPct + fixedCosts + (amortization[0]?.payment || 0)) / 12;
+      monthlyCash.push(monthlyRev - monthlyExp);
+    }
+
+    return {
+      invTotal, finTotal, financingGap, depreciation, amortization,
+      revenues, pl, cashFlows: allCfs, npv, irr, payback,
+      breakEven, breakEvenDay, bfr, monthlyCash,
+      equity, loan, other, scenario, scenarioMult,
+      warning: financingGap > 1 ? 'Plan de financement déséquilibré : financement insuffisant.' : null
+    };
+  }
+};
+
+/* ---------- 3. SCHÉMA DU QUESTIONNAIRE ---------- */
+const DEFAULT_DATA = {
+  meta: { country: 'Cameroun' },
+  A: {}, B: {}, C: {}, D: {}, E: {}, F: {}, G: {},
+  investments: { terrain: 0, construction: 0, equipment: 0, furniture: 0, it: 0, vehicle: 0, fees: 0, launch: 0, workingCapital: 0 },
+  financing: { equity: 0, loan: 0, other: 0, loanRate: 0.12, loanDuration: 5 },
+  revenue: { year1: 0, growth: 0.10 },
+  operating: { materialPct: 0.35, salaries: 0, rent: 0, utilities: 0, transport: 0, marketing: 0, taxes: 0 },
+  fiscal: { taxRate: 0.33, discountRate: 0.15, vatRate: 0.1925 },
+  positions: [],
+  scenario: 'realistic'
+};
+
+const SECTIONS = [
+  {
+    id: 'A', title: 'Identification du projet', icon: '📋',
+    fields: [
+      { key: 'projectName', label: 'Nom du projet', type: 'text', required: true, placeholder: 'Ex: AgriTech SARL' },
+      { key: 'promoter', label: 'Nom du promoteur', type: 'text', required: true },
+      { key: 'location', label: 'Localisation du projet', type: 'text', required: true, placeholder: 'Ville, région' },
+      { key: 'sector', label: "Secteur d'activité", type: 'select', options: ['Agriculture', 'Agroalimentaire', 'Commerce', 'Services', 'Industrie', 'Technologie', 'Tourisme', 'BTP', 'Transport', 'Éducation', 'Santé', 'Autre'] },
+      { key: 'activityNature', label: "Nature de l'activité", type: 'text', placeholder: 'Production, négoce, prestation...' },
+      { key: 'ideaDescription', label: "Description de l'idée", type: 'textarea', required: true },
+      { key: 'problem', label: 'Problème auquel le projet répond', type: 'textarea' },
+      { key: 'solution', label: 'Solution proposée', type: 'textarea' },
+      { key: 'objectives', label: 'Objectifs du projet', type: 'textarea' },
+      { key: 'stage', label: "Stade d'avancement", type: 'select', options: ['Idée', 'Étude de marché', 'Prototype', 'En lancement', 'En activité'] },
+      { key: 'launchDate', label: 'Date prévisionnelle de lancement', type: 'date' }
+    ]
+  },
+  {
+    id: 'B', title: 'Présentation du promoteur', icon: '👤',
+    fields: [
+      { key: 'fullName', label: 'Nom complet', type: 'text' },
+      { key: 'email', label: 'Email', type: 'email' },
+      { key: 'phone', label: 'Téléphone', type: 'tel' },
+      { key: 'address', label: 'Adresse', type: 'text' },
+      { key: 'education', label: 'Formation académique', type: 'textarea' },
+      { key: 'experience', label: 'Expériences professionnelles', type: 'textarea' },
+      { key: 'skills', label: 'Compétences techniques et managériales', type: 'textarea' },
+      { key: 'entrepreneurialExp', label: 'Expérience entrepreneuriale', type: 'textarea' },
+      { key: 'motivation', label: 'Motivation et vision', type: 'textarea' }
+    ]
+  },
+  {
+    id: 'C', title: 'Étude commerciale', icon: '📈',
+    fields: [
+      { key: 'products', label: 'Produits et services', type: 'textarea', required: true },
+      { key: 'targetClients', label: 'Clients cibles', type: 'textarea' },
+      { key: 'zone', label: 'Zone de commercialisation', type: 'text' },
+      { key: 'marketSize', label: 'Taille du marché estimée (FCFA)', type: 'number' },
+      { key: 'competitors', label: 'Principaux concurrents', type: 'textarea' },
+      { key: 'prices', label: 'Prix de vente envisagés', type: 'textarea' },
+      { key: 'commercialPolicy', label: 'Politique commerciale', type: 'textarea' },
+      { key: 'distribution', label: 'Canaux de distribution', type: 'textarea' },
+      { key: 'marketingStrategy', label: 'Stratégie marketing', type: 'textarea' }
+    ]
+  },
+  {
+    id: 'D', title: 'Étude technique et opérationnelle', icon: '⚙️',
+    fields: [
+      { key: 'process', label: 'Processus de production / prestation', type: 'textarea' },
+      { key: 'equipment', label: 'Équipements nécessaires', type: 'textarea' },
+      { key: 'materials', label: 'Matières premières et consommables', type: 'textarea' },
+      { key: 'suppliers', label: 'Fournisseurs envisagés', type: 'textarea' },
+      { key: 'premises', label: 'Besoins en locaux', type: 'textarea' },
+      { key: 'capacity', label: 'Capacité de production', type: 'text' },
+      { key: 'staffNeeds', label: 'Besoins en personnel (description)', type: 'textarea' },
+      { key: 'organization', label: 'Organisation du fonctionnement', type: 'textarea' },
+      { key: 'operationalCharges', label: 'Charges opérationnelles (description)', type: 'textarea' }
+    ]
+  },
+  { id: 'E', title: 'Investissements et financement', icon: '💰', financial: 'investments', fields: [] },
+  { id: 'F', title: 'Prévisions financières', icon: '💵', financial: 'operating', fields: [] },
+  {
+    id: 'G', title: 'Organisation et RH', icon: '👥',
+    fields: [
+      { key: 'organigram', label: 'Organigramme (description)', type: 'textarea' },
+      { key: 'responsibilities', label: 'Répartition des responsabilités', type: 'textarea' },
+      { key: 'recruitmentPlan', label: 'Plan de recrutement', type: 'textarea' }
+    ]
+  }
+];
+
+/* ---------- 4. ÉTAT & HELPERS ---------- */
+const state = {
+  view: 'home',
+  currentProject: null,
+  currentStep: 0,
+  projects: []
+};
+
+const $ = (sel) => document.querySelector(sel);
+function el(tag, attrs = {}, html = '') {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === 'class') e.className = v;
+    else if (k === 'onclick') e.onclick = v;
+    else if (k.startsWith('data-')) e.setAttribute(k, v);
+    else e[k] = v;
+  });
+  if (html) e.innerHTML = html;
+  return e;
+}
+const uid = () => 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+const fmtMoney = (n) => (Math.round(+n || 0)).toLocaleString('fr-FR') + ' FCFA';
+const fmtPct = (n) => ((+n || 0) * 100).toFixed(1) + '%';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ---------- 5. INIT ---------- */
+async function init() {
+  try {
+    state.projects = await getAllProjects();
+  } catch (e) {
+    console.error('IndexedDB error:', e);
+    state.projects = [];
+  }
+  render();
+}
+
+async function persist() {
+  if (!state.currentProject) return;
+  state.currentProject.updatedAt = Date.now();
+  try {
+    await saveProject(state.currentProject);
+    state.projects = await getAllProjects();
+  } catch (e) { console.error('Save error:', e); }
+}
+
+function navigate(view) {
+  state.view = view;
+  window.scrollTo(0, 0);
+  render();
+}
+
+/* ---------- 6. ACTIONS ---------- */
+async function newProject() {
+  const p = {
+    id: uid(),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    name: 'Nouveau projet',
+    data: JSON.parse(JSON.stringify(DEFAULT_DATA)),
+    completedSteps: []
+  };
+  await saveProject(p);
+  state.currentProject = p;
+  state.currentStep = 0;
+  state.projects = await getAllProjects();
+  navigate('wizard');
+}
+
+async function openProject(id) {
+  const p = await getProject(id);
+  if (!p) return;
+  state.currentProject = p;
+  navigate('dashboard');
+}
+
+async function confirmDelete(id) {
+  if (!confirm('Supprimer définitivement ce projet ?')) return;
+  await deleteProject(id);
+  state.projects = await getAllProjects();
+  if (state.currentProject?.id === id) {
+    state.currentProject = null;
+    navigate('home');
+  } else render();
+}
+
+/* ---------- 7. RENDER PRINCIPAL ---------- */
+function render() {
+  const app = $('#app');
+  if (!state.currentProject && state.view !== 'home') state.view = 'home';
+  app.innerHTML = '';
+  const layout = el('div', { class: 'layout' });
+  layout.appendChild(renderSidebar());
+  const main = el('div', { class: 'main' });
+  main.appendChild(renderView());
+  layout.appendChild(main);
+  app.appendChild(layout);
+
+  if (state.view === 'dashboard') requestAnimationFrame(renderDashboardCharts);
+  if (state.view === 'financials') requestAnimationFrame(renderFinancialsCharts);
+}
+
+function renderSidebar() {
+  const sb = el('aside', { class: 'sidebar' });
+  sb.appendChild(el('div', { class: 'sidebar-logo' },
+    `<h1>Business<span>Plan</span> Pro</h1><small>Générateur de business plan</small>`));
+  const nav = el('nav', { class: 'sidebar-nav' });
+  const items = [
+    { view: 'home', label: '🏠 Accueil', need: false },
+    { view: 'dashboard', label: '📊 Tableau de bord', need: true },
+    { view: 'wizard', label: '📝 Questionnaire', need: true },
+    { view: 'financials', label: '💹 Analyse financière', need: true },
+    { view: 'documents', label: '📚 Bibliothèque', need: true },
+    { view: 'settings', label: '⚙️ Paramètres', need: true }
+  ];
+  items.forEach(it => {
+    const disabled = it.need && !state.currentProject;
+    const active = state.view === it.view ? 'active' : '';
+    const n = el('div', {
+      class: `nav-item ${active} ${disabled ? 'disabled' : ''}`,
+      onclick: () => { if (!disabled) navigate(it.view); }
+    }, `<span>${it.label}</span>`);
+    nav.appendChild(n);
+  });
+  sb.appendChild(nav);
+  return sb;
+}
+
+function renderView() {
+  switch (state.view) {
+    case 'home': return viewHome();
+    case 'wizard': return viewWizard();
+    case 'dashboard': return viewDashboard();
+    case 'financials': return viewFinancials();
+    case 'documents': return viewDocuments();
+    case 'settings': return viewSettings();
+    default: return viewHome();
+  }
+}
+
+/* ---------- 8. VUE : ACCUEIL ---------- */
+function viewHome() {
+  const w = el('div');
+  const top = el('div', { class: 'topbar' });
+  top.innerHTML = `<div><h2>Mes projets</h2><div class="topbar-info">${state.projects.length} projet(s) sauvegardé(s)</div></div>
+    <button class="btn btn-primary" id="btn-new">+ Nouveau projet</button>`;
+  top.querySelector('#btn-new').onclick = newProject;
+  w.appendChild(top);
+
+  if (!state.projects.length) {
+    const empty = el('div', { class: 'card empty-state' });
+    empty.innerHTML = `<h3>Aucun projet pour l'instant</h3>
+      <p>Créez votre premier business plan en quelques minutes.</p>
+      <button class="btn btn-primary mt-4" id="btn-new2">+ Créer un projet</button>`;
+    empty.querySelector('#btn-new2').onclick = newProject;
+    w.appendChild(empty);
+    return w;
+  }
+
+  const grid = el('div', { class: 'card-grid' });
+  state.projects.sort((a, b) => b.updatedAt - a.updatedAt).forEach(p => {
+    const d = p.data || {};
+    const name = d.A?.projectName || 'Projet sans nom';
+    const sector = d.A?.sector || '—';
+    const progress = p.completedSteps?.length || 0;
+    const card = el('div', { class: 'project-card' });
+    card.innerHTML = `
+      <h4>${esc(name)}</h4>
+      <div class="meta">${esc(sector)} · ${esc(d.A?.location || '')}</div>
+      <div class="meta">Avancement : ${progress}/${SECTIONS.length} sections</div>
+      <div class="meta">Modifié le ${new Date(p.updatedAt).toLocaleDateString('fr-FR')}</div>
+      <div class="actions">
+        <button class="btn btn-sm btn-primary" data-open="${p.id}">Ouvrir</button>
+        <button class="btn btn-sm btn-danger" data-del="${p.id}">Suppr.</button>
+      </div>`;
+    card.querySelector('[data-open]').onclick = () => openProject(p.id);
+    card.querySelector('[data-del]').onclick = (e) => { e.stopPropagation(); confirmDelete(p.id); };
+    grid.appendChild(card);
+  });
+  w.appendChild(grid);
+  return w;
+}
+
+/* ---------- 9. VUE : WIZARD ---------- */
+function viewWizard() {
+  const p = state.currentProject;
+  const section = SECTIONS[state.currentStep];
+  const w = el('div');
+
+  const header = el('div', { class: 'topbar' });
+  header.innerHTML = `<div><h2>${section.icon} ${section.title}</h2>
+    <div class="topbar-info">Étape ${state.currentStep + 1} sur ${SECTIONS.length} · ${esc(p.data.A?.projectName || 'Nouveau projet')}</div></div>
+    <button class="btn" id="btn-back">← Tableau de bord</button>`;
+  header.querySelector('#btn-back').onclick = () => navigate('dashboard');
+  w.appendChild(header);
+
+  const prog = el('div', { class: 'progress-steps' });
+  SECTIONS.forEach((s, i) => {
+    const cls = i === state.currentStep ? 'active' : (p.completedSteps?.includes(s.id) ? 'done' : '');
+    prog.appendChild(el('div', { class: `step-pill ${cls}` }));
+  });
+  w.appendChild(prog);
+
+  const card = el('div', { class: 'card' });
+
+  if (section.financial === 'investments') card.appendChild(renderInvestForm());
+  else if (section.financial === 'operating') card.appendChild(renderOperatingForm());
+  else if (section.id === 'G') card.appendChild(renderGForm());
+  else card.appendChild(renderGenericForm(section));
+
+  const nav = el('div', { class: 'flex justify-between align-center mt-4' });
+  const prev = el('button', { class: 'btn', id: 'btn-prev' }, '← Précédent');
+  prev.disabled = state.currentStep === 0;
+  prev.onclick = () => { state.currentStep--; render(); };
+  const next = el('button', { class: 'btn btn-primary', id: 'btn-next' },
+    state.currentStep === SECTIONS.length - 1 ? '✓ Terminer' : 'Suivant →');
+  next.onclick = async () => {
+    if (!p.completedSteps) p.completedSteps = [];
+    if (!p.completedSteps.includes(section.id)) p.completedSteps.push(section.id);
+    if (p.data.A?.projectName) p.name = p.data.A.projectName;
+    await persist();
+    if (state.currentStep === SECTIONS.length - 1) navigate('dashboard');
+    else { state.currentStep++; render(); }
+  };
+  nav.appendChild(prev);
+  nav.appendChild(next);
+  card.appendChild(nav);
+  w.appendChild(card);
+  return w;
+}
+
+function renderGenericForm(section) {
+  const wrap = el('div');
+  const data = state.currentProject.data[section.id] || {};
+  section.fields.forEach(f => {
+    const g = el('div', { class: 'form-group' });
+    g.innerHTML = `<label>${esc(f.label)} ${f.required ? '<span class="req">*</span>' : ''}</label>`;
+    let input;
+    if (f.type === 'textarea') {
+      input = el('textarea', { rows: 3 });
+    } else if (f.type === 'select') {
+      input = el('select');
+      input.appendChild(el('option', { value: '' }, '— Sélectionner —'));
+      (f.options || []).forEach(o => {
+        const opt = el('option', { value: o }, o);
+        if (data[f.key] === o) opt.selected = true;
+        input.appendChild(opt);
+      });
+    } else {
+      input = el('input', { type: f.type || 'text', placeholder: f.placeholder || '' });
+    }
+    input.value = data[f.key] || '';
+    input.onchange = async (e) => {
+      if (!state.currentProject.data[section.id]) state.currentProject.data[section.id] = {};
+      state.currentProject.data[section.id][f.key] = e.target.value;
+      if (section.id === 'A' && f.key === 'projectName') state.currentProject.name = e.target.value;
+      await persist();
+    };
+    g.appendChild(input);
+    wrap.appendChild(g);
+  });
+  return wrap;
+}
+
+function renderInvestForm() {
+  const wrap = el('div');
+  const inv = state.currentProject.data.investments;
+  const fin = state.currentProject.data.financing;
+
+  wrap.appendChild(el('h3', {}, 'Investissements (FCFA)'));
+  const invFields = [
+    ['terrain', 'Terrain et aménagements'],
+    ['construction', 'Construction / rénovation'],
+    ['equipment', 'Équipements et matériels'],
+    ['furniture', 'Mobilier'],
+    ['it', 'Matériel informatique'],
+    ['vehicle', 'Véhicules'],
+    ['fees', 'Frais de constitution'],
+    ['launch', 'Frais de lancement'],
+    ['workingCapital', 'Fonds de roulement initial']
+  ];
+  invFields.forEach(([k, label]) => {
+    const g = el('div', { class: 'form-group' });
+    g.innerHTML = `<label>${label}</label>`;
+    const inp = el('input', { type: 'number', min: 0, step: 1000 });
+    inp.value = inv[k] || 0;
+    inp.onchange = async (e) => { state.currentProject.data.investments[k] = +e.target.value || 0; await persist(); render(); };
+    g.appendChild(inp);
+    wrap.appendChild(g);
+  });
+
+  const total = Object.values(inv).reduce((a, b) => a + (+b || 0), 0);
+  wrap.appendChild(el('div', { class: 'alert alert-info' }, `<b>Total investissement : ${fmtMoney(total)}</b>`));
+
+  wrap.appendChild(el('h3', { class: 'mt-4' }, 'Financement'));
+  [['equity', 'Apport personnel (FCFA)'], ['loan', 'Prêt bancaire (FCFA)'], ['other', 'Autres sources (FCFA)']].forEach(([k, l]) => {
+    const g = el('div', { class: 'form-group' });
+    g.innerHTML = `<label>${l}</label>`;
+    const inp = el('input', { type: 'number', min: 0, step: 1000 });
+    inp.value = fin[k] || 0;
+    inp.onchange = async (e) => { state.currentProject.data.financing[k] = +e.target.value || 0; await persist(); render(); };
+    g.appendChild(inp);
+    wrap.appendChild(g);
+  });
+
+  const row = el('div', { class: 'form-row' });
+  [['loanRate', 'Taux du prêt (ex: 0.12)', 0.01], ['loanDuration', 'Durée du prêt (années)', 1]].forEach(([k, l, step]) => {
+    const g = el('div', { class: 'form-group' });
+    g.innerHTML = `<label>${l}</label>`;
+    const inp = el('input', { type: 'number', step: step, min: 0 });
+    inp.value = fin[k] ?? (k === 'loanRate' ? 0.12 : 5);
+    inp.onchange = async (e) => { state.currentProject.data.financing[k] = +e.target.value; await persist(); };
+    g.appendChild(inp);
+    row.appendChild(g);
+  });
+  wrap.appendChild(row);
+
+  const finTotal = (fin.equity || 0) + (fin.loan || 0) + (fin.other || 0);
+  const gap = total - finTotal;
+  const cls = Math.abs(gap) < 1 ? 'alert-success' : (gap > 0 ? 'alert-warning' : 'alert-info');
+  const msg = Math.abs(gap) < 1 ? '✓ Plan de financement équilibré' :
+              (gap > 0 ? `⚠️ Financement insuffisant de ${fmtMoney(gap)}` : `ℹ️ Excédent de financement de ${fmtMoney(-gap)}`);
+  wrap.appendChild(el('div', { class: `alert ${cls}` }, `<b>${msg}</b>`));
+
+  return wrap;
+}
+
+function renderOperatingForm() {
+  const wrap = el('div');
+  const op = state.currentProject.data.operating;
+  const rev = state.currentProject.data.revenue;
+  const fis = state.currentProject.data.fiscal;
+
+  wrap.appendChild(el('h3', {}, 'Prévisions de chiffre d\'affaires'));
+  const ca = el('div', { class: 'form-group' });
+  ca.innerHTML = `<label>CA prévisionnel année 1 (FCFA)</label>`;
+  const caIn = el('input', { type: 'number', min: 0, step: 10000 });
+  caIn.value = rev.year1 || 0;
+  caIn.onchange = async (e) => { state.currentProject.data.revenue.year1 = +e.target.value || 0; await persist(); };
+  ca.appendChild(caIn);
+  wrap.appendChild(ca);
+
+  const growthG = el('div', { class: 'form-group' });
+  growthG.innerHTML = `<label>Hypothèse de croissance annuelle (ex: 0.10 pour 10%)</label>`;
+  const growthIn = el('input', { type: 'number', min: 0, step: 0.01 });
+  growthIn.value = rev.growth ?? 0.10;
+  growthIn.onchange = async (e) => { state.currentProject.data.revenue.growth = +e.target.value || 0; await persist(); };
+  growthG.appendChild(growthIn);
+  wrap.appendChild(growthG);
+
+  wrap.appendChild(el('h3', { class: 'mt-4' }, 'Charges opérationnelles annuelles'));
+  const opFields = [
+    ['materialPct', 'Coût matières / CA (ex: 0.35)', 0.01],
+    ['salaries', 'Charges salariales mensuelles (FCFA)', 1000],
+    ['rent', 'Loyer mensuel (FCFA)', 1000],
+    ['utilities', 'Eau + électricité mensuel (FCFA)', 1000],
+    ['transport', 'Transport mensuel (FCFA)', 1000],
+    ['marketing', 'Communication / marketing mensuel (FCFA)', 1000],
+    ['taxes', 'Impôts et taxes annuels (FCFA)', 1000]
+  ];
+  opFields.forEach(([k, l, step]) => {
+    const g = el('div', { class: 'form-group' });
+    g.innerHTML = `<label>${l}</label>`;
+    const inp = el('input', { type: 'number', min: 0, step });
+    inp.value = op[k] ?? 0;
+    inp.onchange = async (e) => { state.currentProject.data.operating[k] = +e.target.value || 0; await persist(); };
+    g.appendChild(inp);
+    wrap.appendChild(g);
+  });
+
+  wrap.appendChild(el('h3', { class: 'mt-4' }, 'Paramètres fiscaux'));
+  const row = el('div', { class: 'form-row' });
+  [['taxRate', 'Taux d\'imposition (ex: 0.33)', 0.01], ['discountRate', 'Taux d\'actualisation (ex: 0.15)', 0.01]].forEach(([k, l, step]) => {
+    const g = el('div', { class: 'form-group' });
+    g.innerHTML = `<label>${l}</label>`;
+    const inp = el('input', { type: 'number', min: 0, step });
+    inp.value = fis[k] ?? (k === 'taxRate' ? 0.33 : 0.15);
+    inp.onchange = async (e) => { state.currentProject.data.fiscal[k] = +e.target.value; await persist(); };
+    g.appendChild(inp);
+    row.appendChild(g);
+  });
+  wrap.appendChild(row);
+
+  const sc = el('div', { class: 'form-group' });
+  sc.innerHTML = `<label>Scénario de simulation</label>`;
+  const scSel = el('select');
+  ['prudent', 'realistic', 'optimistic'].forEach(v => {
+    const o = el('option', { value: v }, { prudent: 'Prudent (×0.7)', realistic: 'Réaliste (×1.0)', optimistic: 'Optimiste (×1.3)' }[v]);
+    if (state.currentProject.data.scenario === v) o.selected = true;
+    scSel.appendChild(o);
+  });
+  scSel.onchange = async (e) => { state.currentProject.data.scenario = e.target.value; await persist(); };
+  sc.appendChild(scSel);
+  wrap.appendChild(sc);
+  return wrap;
+}
+
+function renderGForm() {
+  const wrap = el('div');
+  const g = state.currentProject.data.G || {};
+  const positions = state.currentProject.data.positions || [];
+
+  const fields = [
+    ['organigram', 'Organigramme (description)'],
+    ['responsibilities', 'Répartition des responsabilités'],
+    ['recruitmentPlan', 'Plan de recrutement']
+  ];
+  fields.forEach(([k, label]) => {
+    const fg = el('div', { class: 'form-group' });
+    fg.innerHTML = `<label>${label}</label>`;
+    const inp = el('textarea', { rows: 3 });
+    inp.value = g[k] || '';
+    inp.onchange = async (e) => {
+      if (!state.currentProject.data.G) state.currentProject.data.G = {};
+      state.currentProject.data.G[k] = e.target.value;
+      await persist();
+    };
+    fg.appendChild(inp);
+    wrap.appendChild(fg);
+  });
+
+  wrap.appendChild(el('h3', { class: 'mt-4' }, 'Postes à pourvoir'));
+  const tbl = el('div');
+  renderPositionsTable(tbl, positions);
+  wrap.appendChild(tbl);
+  wrap.appendChild(el('button', { class: 'btn btn-sm mt-2', onclick: addPosition }, '+ Ajouter un poste'));
+  return wrap;
+}
+
+function renderPositionsTable(container, positions) {
+  container.innerHTML = '';
+  const p = state.currentProject;
+  if (!positions.length) {
+    container.innerHTML = '<div class="hint">Aucun poste renseigné.</div>';
+    return;
+  }
+  const table = el('table');
+  table.innerHTML = `<thead><tr><th>Intitulé</th><th>Nombre</th><th>Salaire mensuel (FCFA)</th><th></th></tr></thead>`;
+  const tb = el('tbody');
+  positions.forEach((pos, i) => {
+    const tr = el('tr');
+    ['title', 'count', 'salary'].forEach(k => {
+      const td = el('td');
+      const inp = el('input', { type: k === 'title' ? 'text' : 'number', min: 0 });
+      inp.value = pos[k] || (k === 'count' ? 1 : '');
+      inp.style.padding = '4px';
+      inp.onchange = async (e) => {
+        p.data.positions[i][k] = k === 'title' ? e.target.value : +e.target.value;
+        await persist();
+      };
+      td.appendChild(inp);
+      tr.appendChild(td);
+    });
+    const delTd = el('td');
+    const del = el('button', { class: 'btn btn-sm btn-danger', onclick: async () => {
+      p.data.positions.splice(i, 1); await persist(); render();
+    } }, '×');
+    delTd.appendChild(del);
+    tr.appendChild(delTd);
+    tb.appendChild(tr);
+  });
+  table.appendChild(tb);
+  container.appendChild(table);
+}
+
+async function addPosition() {
+  if (!state.currentProject.data.positions) state.currentProject.data.positions = [];
+  state.currentProject.data.positions.push({ title: 'Nouveau poste', count: 1, salary: 0 });
+  await persist();
+  render();
+}
+
+/* ---------- 10. VUE : TABLEAU DE BORD ---------- */
+function viewDashboard() {
+  const w = el('div');
+  const p = state.currentProject;
+  const r = Finance.compute(p.data);
+
+  const top = el('div', { class: 'topbar' });
+  top.innerHTML = `<div><h2>📊 ${esc(p.data.A?.projectName || 'Tableau de bord')}</h2>
+    <div class="topbar-info">${esc(p.data.A?.location || '')} · ${esc(p.data.A?.sector || '')}</div></div>
+    <button class="btn btn-primary" id="btn-newtop">+ Nouveau projet</button>`;
+  top.querySelector('#btn-newtop').onclick = newProject;
+  w.appendChild(top);
+
+  const progress = p.completedSteps?.length || 0;
+  const progressPct = Math.round(progress / SECTIONS.length * 100);
+  w.appendChild(el('div', { class: 'alert alert-info' },
+    `<div><b>Avancement du questionnaire :</b> ${progress}/${SECTIONS.length} sections complétées (${progressPct}%)</div>`));
+
+  if (r.warning) w.appendChild(el('div', { class: 'alert alert-warning' }, `⚠️ ${r.warning}`));
+
+  const grid = el('div', { class: 'card-grid' });
+  const kpis = [
+    { label: 'Investissement total', value: fmtMoney(r.invTotal), cls: '' },
+    { label: 'Apport personnel', value: fmtMoney(r.equity), cls: 'success' },
+    { label: 'Financement recherché', value: fmtMoney(r.loan + r.other), cls: 'warning' },
+    { label: 'CA année 1', value: fmtMoney(r.revenues[0]), cls: '' },
+    { label: 'Résultat net année 1', value: fmtMoney(r.pl[0].netIncome), cls: r.pl[0].netIncome >= 0 ? 'success' : 'danger' },
+    { label: 'Seuil de rentabilité', value: fmtMoney(r.breakEven), cls: 'warning' },
+    { label: 'VAN', value: fmtMoney(r.npv), cls: r.npv > 0 ? 'success' : 'danger' },
+    { label: 'TRI', value: isFinite(r.irr) ? fmtPct(r.irr) : 'N/A', cls: r.irr > 0 ? 'success' : 'danger' },
+    { label: 'Délai de récupération', value: r.payback ? r.payback + ' an(s)' : '> 5 ans', cls: r.payback ? 'success' : 'warning' },
+    { label: 'BFR estimé', value: fmtMoney(r.bfr), cls: '' }
+  ];
+  kpis.forEach(k => {
+    const box = el('div', { class: `kpi ${k.cls}` });
+    box.innerHTML = `<div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div>`;
+    grid.appendChild(box);
+  });
+  w.appendChild(grid);
+
+  const chartCard = el('div', { class: 'card' });
+  chartCard.innerHTML = `<h3>Évolution du chiffre d'affaires et résultat net (5 ans)</h3><div class="chart-container"><canvas id="chart-pl"></canvas></div>`;
+  w.appendChild(chartCard);
+
+  const actions = el('div', { class: 'card' });
+  actions.innerHTML = `<h3>Actions</h3>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="act-wizard">📝 Compléter le questionnaire</button>
+      <button class="btn" id="act-fin">💹 Voir l'analyse financière</button>
+      <button class="btn" id="act-docs">📚 Générer les documents</button>
+    </div>`;
+  actions.querySelector('#act-wizard').onclick = () => navigate('wizard');
+  actions.querySelector('#act-fin').onclick = () => navigate('financials');
+  actions.querySelector('#act-docs').onclick = () => navigate('documents');
+  w.appendChild(actions);
+
+  return w;
+}
+
+function renderDashboardCharts() {
+  const canvas = document.getElementById('chart-pl');
+  if (!canvas) return;
+  const r = Finance.compute(state.currentProject.data);
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: r.pl.map(p => 'An ' + p.year),
+      datasets: [
+        { label: "Chiffre d'affaires", data: r.pl.map(p => p.revenue), backgroundColor: '#2563eb' },
+        { label: 'Résultat net', data: r.pl.map(p => p.netIncome), backgroundColor: '#10b981' }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+/* ---------- 11. VUE : ANALYSE FINANCIÈRE ---------- */
+function viewFinancials() {
+  const w = el('div');
+  const r = Finance.compute(state.currentProject.data);
+
+  const top = el('div', { class: 'topbar' });
+  top.innerHTML = `<div><h2>💹 Analyse financière</h2>
+    <div class="topbar-info">Scénario : ${r.scenario} (×${r.scenarioMult})</div></div>
+    <button class="btn btn-success" id="btn-export-xlsx">📊 Exporter XLSX</button>`;
+  top.querySelector('#btn-export-xlsx').onclick = exportFinancialsXLSX;
+  w.appendChild(top);
+
+  w.appendChild(el('div', { class: 'card' },
+    `<h3>1. Budget des investissements</h3><div class="table-wrap">${renderInvestTable(state.currentProject.data.investments)}</div>`));
+
+  w.appendChild(el('div', { class: 'card' },
+    `<h3>2. Amortissements</h3><div class="table-wrap">${renderDepreciationTable(r)}</div>`));
+
+  w.appendChild(el('div', { class: 'card' },
+    `<h3>3. Plan de financement</h3><div class="table-wrap">${renderFinancingTable(r)}</div>`));
+
+  if (r.amortization.length) {
+    w.appendChild(el('div', { class: 'card' },
+      `<h3>4. Plan de remboursement de l'emprunt</h3><div class="table-wrap">${renderLoanTable(r)}</div>`));
+  }
+
+  w.appendChild(el('div', { class: 'card' },
+    `<h3>5. Compte de résultat prévisionnel (5 ans)</h3><div class="table-wrap">${renderPLTable(r)}</div>`));
+
+  w.appendChild(el('div', { class: 'card' },
+    `<h3>6. Flux de trésorerie</h3><div class="table-wrap">${renderCashFlowTable(r)}</div>
+     <div class="chart-container"><canvas id="chart-cf"></canvas></div>`));
+
+  w.appendChild(el('div', { class: 'card' },
+    `<h3>7. Indicateurs de rentabilité</h3>
+     <div class="table-wrap">
+       <table>
+         <tr><td>VAN</td><td class="num"><b>${fmtMoney(r.npv)}</b></td></tr>
+         <tr><td>TRI</td><td class="num"><b>${isFinite(r.irr) ? fmtPct(r.irr) : 'N/A'}</b></td></tr>
+         <tr><td>Délai de récupération</td><td class="num"><b>${r.payback ? r.payback + ' an(s)' : '> 5 ans'}</b></td></tr>
+         <tr><td>Seuil de rentabilité (année 1)</td><td class="num"><b>${fmtMoney(r.breakEven)}</b></td></tr>
+         <tr><td>Point mort (jours)</td><td class="num"><b>${r.breakEvenDay} jours</b></td></tr>
+         <tr><td>BFR estimé (30j de CA)</td><td class="num"><b>${fmtMoney(r.bfr)}</b></td></tr>
+       </table>
+     </div>`));
+
+  return w;
+}
+
+function renderInvestTable(inv) {
+  const rows = [
+    ['Terrain et aménagements', inv.terrain],
+    ['Construction / rénovation', inv.construction],
+    ['Équipements et matériels', inv.equipment],
+    ['Mobilier', inv.furniture],
+    ['Matériel informatique', inv.it],
+    ['Véhicules', inv.vehicle],
+    ['Frais de constitution', inv.fees],
+    ['Frais de lancement', inv.launch],
+    ['Fonds de roulement', inv.workingCapital]
+  ];
+  const total = rows.reduce((a, [, v]) => a + (+v || 0), 0);
+  return `<table><thead><tr><th>Poste</th><th class="num">Montant</th></tr></thead><tbody>
+    ${rows.map(([l, v]) => `<tr><td>${l}</td><td class="num">${fmtMoney(v)}</td></tr>`).join('')}
+    <tr class="total"><td>TOTAL</td><td class="num">${fmtMoney(total)}</td></tr>
+  </tbody></table>`;
+}
+function renderDepreciationTable(r) {
+  return `<table><thead><tr><th>Année</th>${r.depreciation.map((_, i) => `<th class="num">An ${i + 1}</th>`).join('')}</tr></thead>
+    <tbody><tr><td>Dotation aux amortissements</td>${r.depreciation.map(d => `<td class="num">${fmtMoney(d)}</td>`).join('')}</tr></tbody></table>`;
+}
+function renderFinancingTable(r) {
+  return `<table><thead><tr><th>Source</th><th class="num">Montant</th><th class="num">%</th></tr></thead><tbody>
+    <tr><td>Apport personnel</td><td class="num">${fmtMoney(r.equity)}</td><td class="num">${r.finTotal ? fmtPct(r.equity / r.finTotal) : '—'}</td></tr>
+    <tr><td>Prêt bancaire</td><td class="num">${fmtMoney(r.loan)}</td><td class="num">${r.finTotal ? fmtPct(r.loan / r.finTotal) : '—'}</td></tr>
+    <tr><td>Autres sources</td><td class="num">${fmtMoney(r.other)}</td><td class="num">${r.finTotal ? fmtPct(r.other / r.finTotal) : '—'}</td></tr>
+    <tr class="total"><td>Total financement</td><td class="num">${fmtMoney(r.finTotal)}</td><td class="num">100%</td></tr>
+    <tr><td>Investissement total</td><td class="num">${fmtMoney(r.invTotal)}</td><td></td></tr>
+    <tr><td>Solde</td><td class="num"><span class="badge ${Math.abs(r.financingGap) < 1 ? 'success' : 'danger'}">${fmtMoney(r.financingGap)}</span></td><td></td></tr>
+  </tbody></table>`;
+}
+function renderLoanTable(r) {
+  return `<table><thead><tr><th>Année</th><th class="num">Mensualité</th><th class="num">Intérêts</th><th class="num">Capital</th><th class="num">Solde</th></tr></thead><tbody>
+    ${r.amortization.map(a => `<tr><td>${a.year}</td><td class="num">${fmtMoney(a.payment)}</td><td class="num">${fmtMoney(a.interest)}</td><td class="num">${fmtMoney(a.principal)}</td><td class="num">${fmtMoney(a.balance)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+function renderPLTable(r) {
+  const lines = [
+    ["Chiffre d'affaires", 'revenue'],
+    ['Coût des matières', 'materials'],
+    ['Marge brute', 'margin'],
+    ['Charges salariales', 'salaries'],
+    ['Loyers', 'rent'],
+    ['Eau et électricité', 'utilities'],
+    ['Transport', 'transport'],
+    ['Marketing', 'marketing'],
+    ['Impôts et taxes', 'taxes'],
+    ['EBE (excédent brut)', 'ebe'],
+    ['Amortissements', 'depreciation'],
+    ['Charges financières', 'interest'],
+    ['Résultat avant impôt', 'beforeTax'],
+    ['Impôt sur les sociétés', 'tax'],
+    ['RÉSULTAT NET', 'netIncome']
+  ];
+  return `<table><thead><tr><th>Poste</th>${r.pl.map(p => `<th class="num">An ${p.year}</th>`).join('')}</tr></thead><tbody>
+    ${lines.map(([label, key]) => `<tr class="${key === 'netIncome' ? 'total' : ''}"><td>${label}</td>${r.pl.map(p => `<td class="num">${fmtMoney(p[key])}</td>`).join('')}</tr>`).join('')}
+  </tbody></table>`;
+}
+function renderCashFlowTable(r) {
+  let cumul = 0;
+  const rows = r.cashFlows.map((cf, i) => {
+    cumul += cf;
+    return `<tr><td>${i === 0 ? 'Initial' : 'An ' + i}</td><td class="num">${fmtMoney(cf)}</td><td class="num">${fmtMoney(cumul)}</td></tr>`;
+  }).join('');
+  return `<table><thead><tr><th>Année</th><th class="num">Flux</th><th class="num">Cumulé</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderFinancialsCharts() {
+  const canvas = document.getElementById('chart-cf');
+  if (!canvas) return;
+  const r = Finance.compute(state.currentProject.data);
+  let cumul = 0;
+  const cumulData = r.cashFlows.map(cf => (cumul += cf, cumul));
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: r.cashFlows.map((_, i) => i === 0 ? 'Init' : 'An ' + i),
+      datasets: [
+        { label: 'Flux de trésorerie', data: r.cashFlows, borderColor: '#2563eb', fill: false },
+        { label: 'Cumulé', data: cumulData, borderColor: '#10b981', fill: false }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+/* ---------- 12. VUE : DOCUMENTS ---------- */
+function viewDocuments() {
+  const w = el('div');
+  const top = el('div', { class: 'topbar' });
+  top.innerHTML = `<div><h2>📚 Bibliothèque documentaire</h2>
+    <div class="topbar-info">Documents générés automatiquement à partir de vos données</div></div>
+    <button class="btn btn-primary" id="btn-full-pdf">📄 Business plan complet (PDF)</button>`;
+  top.querySelector('#btn-full-pdf').onclick = exportFullPDF;
+  w.appendChild(top);
+
+  const docs = [
+    { id: 'fiche', title: "Fiche d'identification", mod: 1 },
+    { id: 'resume', title: 'Résumé exécutif', mod: 1 },
+    { id: 'promoteur', title: 'Présentation du promoteur', mod: 1 },
+    { id: 'entreprise', title: "Présentation de l'entreprise", mod: 1 },
+    { id: 'marche', title: 'Étude de marché', mod: 2 },
+    { id: 'swot', title: 'Analyse SWOT', mod: 2 },
+    { id: 'pestel', title: 'Analyse PESTEL', mod: 2 },
+    { id: 'technique', title: 'Étude technique', mod: 3 },
+    { id: 'financiere', title: 'Étude financière', mod: 4 },
+    { id: 'risques', title: 'Gestion des risques', mod: 5 },
+    { id: 'planning', title: 'Planning de mise en œuvre', mod: 6 }
+  ];
+
+  const grid = el('div', { class: 'card-grid' });
+  docs.forEach(d => {
+    const card = el('div', { class: 'project-card' });
+    card.innerHTML = `
+      <h4>${d.title}</h4>
+      <div class="meta">Module ${d.mod}</div>
+      <div class="actions">
+        <button class="btn btn-sm btn-primary" data-preview="${d.id}">👁 Aperçu</button>
+        <button class="btn btn-sm" data-pdf="${d.id}">PDF</button>
+        <button class="btn btn-sm" data-docx="${d.id}">DOCX</button>
+      </div>`;
+    card.querySelector('[data-preview]').onclick = () => previewDocument(d);
+    card.querySelector('[data-pdf]').onclick = () => exportDocPDF(d);
+    card.querySelector('[data-docx]').onclick = () => exportDocDOCX(d);
+    grid.appendChild(card);
+  });
+  w.appendChild(grid);
+  return w;
+}
+
+/* ---------- 13. GÉNÉRATION DOCUMENTS ---------- */
+function generateDocument(docId) {
+  const p = state.currentProject;
+  const d = p.data;
+  const r = Finance.compute(d);
+  const A = d.A || {}, B = d.B || {}, C = d.C || {}, D = d.D || {};
+  const section = (title, body) => `<h2>${title}</h2>${body}`;
+  const field = (label, val) => val ? `<p><b>${label} :</b> ${esc(val)}</p>` : `<p><i>${label} : non renseigné</i></p>`;
+
+  const docs = {
+    fiche: () => `
+      <h1>Fiche d'identification du projet</h1>
+      <table>
+        <tr><td><b>Nom du projet</b></td><td>${esc(A.projectName || '—')}</td></tr>
+        <tr><td><b>Promoteur</b></td><td>${esc(A.promoter || '—')}</td></tr>
+        <tr><td><b>Localisation</b></td><td>${esc(A.location || '—')}</td></tr>
+        <tr><td><b>Pays</b></td><td>${esc(d.meta?.country || 'Cameroun')}</td></tr>
+        <tr><td><b>Secteur</b></td><td>${esc(A.sector || '—')}</td></tr>
+        <tr><td><b>Nature</b></td><td>${esc(A.activityNature || '—')}</td></tr>
+        <tr><td><b>Stade d'avancement</b></td><td>${esc(A.stage || '—')}</td></tr>
+        <tr><td><b>Date de lancement</b></td><td>${esc(A.launchDate || '—')}</td></tr>
+        <tr><td><b>Investissement total</b></td><td>${fmtMoney(r.invTotal)}</td></tr>
+        <tr><td><b>Financement recherché</b></td><td>${fmtMoney(r.loan + r.other)}</td></tr>
+      </table>`,
+    resume: () => `
+      <h1>Résumé exécutif</h1>
+      ${field('Projet', A.projectName)}
+      ${field('Porteur', A.promoter)}
+      <p>${esc(A.ideaDescription || '')}</p>
+      <h3>Chiffres clés</h3>
+      <ul>
+        <li><b>Investissement total :</b> ${fmtMoney(r.invTotal)}</li>
+        <li><b>Apport personnel :</b> ${fmtMoney(r.equity)}</li>
+        <li><b>Financement recherché :</b> ${fmtMoney(r.loan + r.other)}</li>
+        <li><b>CA année 1 :</b> ${fmtMoney(r.revenues[0])}</li>
+        <li><b>Résultat net année 1 :</b> ${fmtMoney(r.pl[0].netIncome)}</li>
+        <li><b>VAN :</b> ${fmtMoney(r.npv)}</li>
+        <li><b>TRI :</b> ${isFinite(r.irr) ? fmtPct(r.irr) : 'N/A'}</li>
+      </ul>`,
+    promoteur: () => `
+      <h1>Présentation du promoteur</h1>
+      ${field('Nom complet', B.fullName || A.promoter)}
+      ${field('Email', B.email)}
+      ${field('Téléphone', B.phone)}
+      ${field('Formation', B.education)}
+      ${field('Expérience', B.experience)}
+      ${field('Compétences', B.skills)}
+      ${field('Motivation', B.motivation)}`,
+    entreprise: () => `
+      <h1>Présentation de l'entreprise</h1>
+      ${field('Nom', A.projectName)}
+      ${field('Secteur', A.sector)}
+      ${field('Localisation', A.location)}
+      ${field('Objectifs', A.objectives)}
+      ${field('Solution', A.solution)}`,
+    marche: () => `
+      <h1>Étude de marché</h1>
+      ${section('Produits et services', `<p>${esc(C.products || '')}</p>`)}
+      ${section('Clients cibles', `<p>${esc(C.targetClients || '')}</p>`)}
+      ${section('Zone de commercialisation', `<p>${esc(C.zone || '')}</p>`)}
+      ${section('Concurrents', `<p>${esc(C.competitors || '')}</p>`)}
+      ${section('Politique commerciale', `<p>${esc(C.commercialPolicy || '')}</p>`)}
+      ${section('Distribution', `<p>${esc(C.distribution || '')}</p>`)}
+      ${section('Stratégie marketing', `<p>${esc(C.marketingStrategy || '')}</p>`)}
+      <div class="info">⚠️ Les données de marché doivent être validées par une étude complémentaire avant présentation à un financeur.</div>`,
+    swot: () => `
+      <h1>Analyse SWOT</h1>
+      <p><i>Analyse qualitative basée sur les informations fournies par le promoteur. À approfondir.</i></p>
+      <table>
+        <tr><th>Forces</th><td>Porteur motivé, idée définie, secteur ${esc(A.sector || 'générique')}</td></tr>
+        <tr><th>Faiblesses</th><td>${!d.investments?.equipment ? 'Équipements à financer, ' : ''}Notoriété à construire</td></tr>
+        <tr><th>Opportunités</th><td>Marché à explorer, digitalisation, besoins locaux</td></tr>
+        <tr><th>Menaces</th><td>Concurrence, contexte économique, accès au financement</td></tr>
+      </table>
+      <div class="info">Cette analyse est générique et doit être personnalisée avec les données réelles du promoteur.</div>`,
+    pestel: () => `
+      <h1>Analyse PESTEL</h1>
+      <table>
+        <tr><th>Politique</th><td>Stabilité, politiques sectorielles (${esc(d.meta?.country || 'Cameroun')})</td></tr>
+        <tr><th>Économique</th><td>Inflation, accès au crédit, pouvoir d'achat</td></tr>
+        <tr><th>Socioculturel</th><td>Comportements des consommateurs, démographie</td></tr>
+        <tr><th>Technologique</th><td>Digitalisation, outils disponibles</td></tr>
+        <tr><th>Environnemental</th><td>Réglementations, impact écologique</td></tr>
+        <tr><th>Légal</th><td>${d.meta?.country === 'Cameroun' ? 'SYSCOHADA révisé, OHADA, fiscalité camerounaise' : 'Réglementation locale'}</td></tr>
+      </table>
+      <div class="info">Cadre d'analyse standard à personnaliser selon les réalités du projet.</div>`,
+    technique: () => `
+      <h1>Étude technique et opérationnelle</h1>
+      ${section('Processus', `<p>${esc(D.process || '')}</p>`)}
+      ${section('Équipements', `<p>${esc(D.equipment || '')}</p>`)}
+      ${section('Matières premières', `<p>${esc(D.materials || '')}</p>`)}
+      ${section('Fournisseurs', `<p>${esc(D.suppliers || '')}</p>`)}
+      ${section('Locaux', `<p>${esc(D.premises || '')}</p>`)}
+      ${section('Capacité', `<p>${esc(D.capacity || '')}</p>`)}
+      ${section('Organisation', `<p>${esc(D.organization || '')}</p>`)}`,
+    financiere: () => `
+      <h1>Étude financière</h1>
+      <h3>Investissement</h3>
+      <p>Total investissement : <b>${fmtMoney(r.invTotal)}</b></p>
+      <h3>Financement</h3>
+      <p>Apport personnel : ${fmtMoney(r.equity)} · Prêt : ${fmtMoney(r.loan)} · Autres : ${fmtMoney(r.other)}</p>
+      <h3>Compte de résultat prévisionnel</h3>
+      <table>
+        <thead><tr><th>Poste</th>${r.pl.map(p => `<th>An ${p.year}</th>`).join('')}</tr></thead>
+        <tbody>
+          <tr><td>CA</td>${r.pl.map(p => `<td>${fmtMoney(p.revenue)}</td>`).join('')}</tr>
+          <tr><td>Charges</td>${r.pl.map(p => `<td>${fmtMoney(p.materials + p.salaries + p.rent + p.utilities + p.transport + p.marketing + p.taxes)}</td>`).join('')}</tr>
+          <tr><td>Amortissements</td>${r.pl.map(p => `<td>${fmtMoney(p.depreciation)}</td>`).join('')}</tr>
+          <tr><td><b>Résultat net</b></td>${r.pl.map(p => `<td><b>${fmtMoney(p.netIncome)}</b></td>`).join('')}</tr>
+        </tbody>
+      </table>
+      <h3>Indicateurs</h3>
+      <ul>
+        <li>VAN : <b>${fmtMoney(r.npv)}</b></li>
+        <li>TRI : <b>${isFinite(r.irr) ? fmtPct(r.irr) : 'N/A'}</b></li>
+        <li>Délai de récupération : <b>${r.payback ? r.payback + ' an(s)' : '> 5 ans'}</b></li>
+        <li>Seuil de rentabilité : <b>${fmtMoney(r.breakEven)}</b></li>
+      </ul>`,
+    risques: () => `
+      <h1>Gestion des risques</h1>
+      <table>
+        <thead><tr><th>Risque</th><th>Catégorie</th><th>Criticité</th><th>Mesure préventive</th></tr></thead>
+        <tbody>
+          <tr><td>Insuffisance de trésorerie</td><td>Financier</td><td><span class="badge danger">Élevée</span></td><td>Fonds de roulement, suivi mensuel</td></tr>
+          <tr><td>Faible notoriété</td><td>Commercial</td><td><span class="badge warning">Moyenne</span></td><td>Marketing digital, partenariats</td></tr>
+          <tr><td>Retard d'approvisionnement</td><td>Opérationnel</td><td><span class="badge warning">Moyenne</span></td><td>Diversifier les fournisseurs</td></tr>
+          <tr><td>Concurrence accrue</td><td>Commercial</td><td><span class="badge warning">Moyenne</span></td><td>Différenciation, qualité</td></tr>
+          <tr><td>Défaillance équipement</td><td>Technique</td><td><span class="badge info">Faible</span></td><td>Maintenance préventive</td></tr>
+        </tbody>
+      </table>`,
+    planning: () => `
+      <h1>Planning de mise en œuvre</h1>
+      <table>
+        <thead><tr><th>Phase</th><th>Activités</th><th>Durée</th></tr></thead>
+        <tbody>
+          <tr><td>1. Conception</td><td>Finalisation business plan, validation</td><td>1-2 mois</td></tr>
+          <tr><td>2. Financement</td><td>Constitution dossier, négociation</td><td>1-3 mois</td></tr>
+          <tr><td>3. Mise en place</td><td>Installation, équipements, recrutement</td><td>2-4 mois</td></tr>
+          <tr><td>4. Lancement</td><td>Communication, premières ventes</td><td>1 mois</td></tr>
+          <tr><td>5. Croissance</td><td>Développement commercial</td><td>6-12 mois</td></tr>
+        </tbody>
+      </table>`
+  };
+
+  return docs[docId] ? docs[docId]() : '<p>Document non disponible.</p>';
+}
+
+function previewDocument(doc) {
+  const html = generateDocument(doc.id);
+  const modal = el('div', { class: 'modal-backdrop' });
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  const box = el('div', { class: 'modal' });
+  box.innerHTML = `
+    <div class="modal-header">
+      <h3>${doc.title}</h3>
+      <button class="btn btn-sm" id="close-modal">✕</button>
+    </div>
+    <div class="modal-body doc-content">${html}</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="dl-pdf">📄 Télécharger PDF</button>
+      <button class="btn" id="dl-docx">📝 Télécharger DOCX</button>
+    </div>`;
+  box.querySelector('#close-modal').onclick = () => modal.remove();
+  box.querySelector('#dl-pdf').onclick = () => exportDocPDF(doc);
+  box.querySelector('#dl-docx').onclick = () => exportDocDOCX(doc);
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+}
+
+/* ---------- 14. EXPORTS ---------- */
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+function sanitizeFilename(name) {
+  return String(name || 'document').replace(/[^a-z0-9\-_ ]/gi, '').replace(/\s+/g, '-').toLowerCase();
+}
+
+async function exportDocPDF(doc) {
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const content = generateDocument(doc.id);
+
+    pdf.setFontSize(18);
+    pdf.setTextColor(37, 99, 235);
+    pdf.text(doc.title, 14, 20);
+    pdf.setFontSize(9);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text('BusinessPlan Pro — ' + new Date().toLocaleDateString('fr-FR'), 14, 27);
+
+    const plain = stripHtml(content);
+    pdf.setFontSize(10);
+    pdf.setTextColor(30, 41, 59);
+    const lines = pdf.splitTextToSize(plain, 180);
+    let y = 40;
+    lines.forEach(line => {
+      if (y > 280) { pdf.addPage(); y = 20; }
+      pdf.text(line, 14, y);
+      y += 5;
+    });
+
+    pdf.save(sanitizeFilename(doc.title) + '.pdf');
+  } catch (e) { alert('Erreur PDF : ' + e.message); }
+}
+
+async function exportDocDOCX(doc) {
+  try {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+    const plain = stripHtml(generateDocument(doc.id));
+    const paragraphs = plain.split('\n').filter(l => l.trim()).map(line =>
+      new Paragraph({ children: [new TextRun(line)], spacing: { after: 120 } })
+    );
+    const docx = new Document({
+      sections: [{
+        children: [
+          new Paragraph({ text: doc.title, heading: HeadingLevel.HEADING_1 }),
+          new Paragraph({ children: [new TextRun({ text: 'Généré le ' + new Date().toLocaleDateString('fr-FR'), italics: true })] }),
+          ...paragraphs
+        ]
+      }]
+    });
+    const blob = await Packer.toBlob(docx);
+    saveAs(blob, sanitizeFilename(doc.title) + '.docx');
+  } catch (e) { alert('Erreur DOCX : ' + e.message); }
+}
+
+function exportFinancialsXLSX() {
+  try {
+    const r = Finance.compute(state.currentProject.data);
+    const wb = XLSX.utils.book_new();
+
+    const inv = state.currentProject.data.investments;
+    const invData = [
+      ['Poste', 'Montant (FCFA)'],
+      ['Terrain', inv.terrain], ['Construction', inv.construction],
+      ['Équipements', inv.equipment], ['Mobilier', inv.furniture],
+      ['Informatique', inv.it], ['Véhicules', inv.vehicle],
+      ['Frais de constitution', inv.fees], ['Frais de lancement', inv.launch],
+      ['Fonds de roulement', inv.workingCapital],
+      ['TOTAL', Object.values(inv).reduce((a, b) => a + (+b || 0), 0)]
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(invData), 'Investissements');
+
+    const plData = [['Poste', 'An 1', 'An 2', 'An 3', 'An 4', 'An 5']];
+    ['revenue', 'materials', 'margin', 'ebe', 'depreciation', 'interest', 'beforeTax', 'tax', 'netIncome'].forEach(k => {
+      plData.push([k, ...r.pl.map(p => Math.round(p[k]))]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(plData), 'Compte de résultat');
+
+    const cfData = [['Année', 'Flux'], ...r.cashFlows.map((cf, i) => [i === 0 ? 'Init' : 'An ' + i, Math.round(cf)])];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cfData), 'Cash-flow');
+
+    const indData = [
+      ['Indicateur', 'Valeur'],
+      ['VAN', Math.round(r.npv)],
+      ['TRI', isFinite(r.irr) ? (r.irr * 100).toFixed(2) + '%' : 'N/A'],
+      ['Payback', r.payback ? r.payback + ' an(s)' : '> 5 ans'],
+      ['Seuil de rentabilité', Math.round(r.breakEven)],
+      ['BFR', Math.round(r.bfr)]
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(indData), 'Indicateurs');
+
+    XLSX.writeFile(wb, sanitizeFilename(state.currentProject.data.A?.projectName || 'business-plan') + '-financier.xlsx');
+  } catch (e) { alert('Erreur XLSX : ' + e.message); }
+}
+
+async function exportFullPDF() {
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const p = state.currentProject;
+    const d = p.data;
+
+    // Couverture
+    pdf.setFontSize(28);
+    pdf.setTextColor(37, 99, 235);
+    pdf.text('BUSINESS PLAN', 14, 40);
+    pdf.setFontSize(20);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text(d.A?.projectName || 'Projet', 14, 55);
+    pdf.setFontSize(12);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text('Promoteur : ' + (d.A?.promoter || '—'), 14, 70);
+    pdf.text('Localisation : ' + (d.A?.location || '—'), 14, 78);
+    pdf.text('Date : ' + new Date().toLocaleDateString('fr-FR'), 14, 86);
+
+    // Sommaire
+    pdf.addPage();
+    pdf.setFontSize(18);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text('Table des matières', 14, 20);
+    pdf.setFontSize(11);
+    const toc = [
+      "1. Fiche d'identification", '2. Résumé exécutif', '3. Présentation du promoteur',
+      "4. Présentation de l'entreprise", '5. Étude de marché', '6. Étude technique',
+      '7. Étude financière', '8. Gestion des risques', '9. Planning de mise en œuvre'
+    ];
+    toc.forEach((t, i) => pdf.text(t, 14, 35 + i * 8));
+
+    const allDocs = ['fiche', 'resume', 'promoteur', 'entreprise', 'marche', 'technique', 'financiere', 'risques', 'planning'];
+    const titles = ["Fiche d'identification", 'Résumé exécutif', 'Présentation du promoteur', "Présentation de l'entreprise", 'Étude de marché', 'Étude technique', 'Étude financière', 'Gestion des risques', 'Planning de mise en œuvre'];
+    allDocs.forEach((id, i) => {
+      pdf.addPage();
+      pdf.setFontSize(16);
+      pdf.setTextColor(37, 99, 235);
+      pdf.text(titles[i], 14, 20);
+      pdf.setFontSize(10);
+      pdf.setTextColor(30, 41, 59);
+      const content = stripHtml(generateDocument(id));
+      const lines = pdf.splitTextToSize(content, 180);
+      let y = 32;
+      lines.forEach(line => {
+        if (y > 280) { pdf.addPage(); y = 20; }
+        pdf.text(line, 14, y);
+        y += 5;
+      });
+    });
+
+    pdf.save(sanitizeFilename(d.A?.projectName || 'business-plan') + '-complet.pdf');
+  } catch (e) { alert('Erreur PDF complet : ' + e.message); }
+}
+
+/* ---------- 15. VUE : PARAMÈTRES ---------- */
+function viewSettings() {
+  const w = el('div');
+  const p = state.currentProject;
+  w.appendChild(el('div', { class: 'topbar' }, `<h2>⚙️ Paramètres du projet</h2>`));
+
+  const info = el('div', { class: 'card' });
+  info.innerHTML = `
+    <h3>Informations générales</h3>
+    <div class="form-group">
+      <label>Nom du projet</label>
+      <input type="text" id="set-name" value="${esc(p.data.A?.projectName || '')}" />
+    </div>
+    <div class="form-group">
+      <label>Pays d'implantation</label>
+      <select id="set-country">
+        ${['Cameroun', 'Gabon', 'Congo', 'Tchad', 'RCA', 'Guinée Équatoriale', 'Autre'].map(c => `<option ${p.data.meta?.country === c ? 'selected' : ''}>${c}</option>`).join('')}
+      </select>
+      <div class="hint">Paramètres par défaut : Cameroun (SYSCOHADA révisé, OHADA).</div>
+    </div>
+    <div class="form-group">
+      <label>Scénario de simulation</label>
+      <select id="set-scenario">
+        ${['prudent', 'realistic', 'optimistic'].map(s => `<option value="${s}" ${p.data.scenario === s ? 'selected' : ''}>${{ prudent: 'Prudent', realistic: 'Réaliste', optimistic: 'Optimiste' }[s]}</option>`).join('')}
+      </select>
+    </div>`;
+  w.appendChild(info);
+
+  info.querySelector('#set-name').onchange = async (e) => {
+    if (!p.data.A) p.data.A = {};
+    p.data.A.projectName = e.target.value;
+    p.name = e.target.value;
+    await persist();
+  };
+  info.querySelector('#set-country').onchange = async (e) => {
+    if (!p.data.meta) p.data.meta = {};
+    p.data.meta.country = e.target.value;
+    await persist();
+  };
+  info.querySelector('#set-scenario').onchange = async (e) => {
+    p.data.scenario = e.target.value;
+    await persist(); render();
+  };
+
+  const danger = el('div', { class: 'card' });
+  danger.innerHTML = `
+    <h3>Zone dangereuse</h3>
+    <p style="color:var(--text-light);font-size:13px;margin-bottom:12px;">Supprimer ce projet effacera définitivement toutes les données associées.</p>
+    <button class="btn btn-danger" id="btn-delete">Supprimer ce projet</button>`;
+  danger.querySelector('#btn-delete').onclick = () => confirmDelete(p.id);
+  w.appendChild(danger);
+
+  const exportAll = el('div', { class: 'card' });
+  exportAll.innerHTML = `
+    <h3>Exports</h3>
+    <div class="btn-group">
+      <button class="btn" id="exp-json">📦 Exporter données (JSON)</button>
+      <button class="btn btn-primary" id="exp-pdf">📄 Business plan complet (PDF)</button>
+      <button class="btn btn-success" id="exp-xlsx">📊 Tableaux financiers (XLSX)</button>
+    </div>`;
+  exportAll.querySelector('#exp-json').onclick = () => {
+    const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+    saveAs(blob, sanitizeFilename(p.name) + '.json');
+  };
+  exportAll.querySelector('#exp-pdf').onclick = exportFullPDF;
+  exportAll.querySelector('#exp-xlsx').onclick = exportFinancialsXLSX;
+  w.appendChild(exportAll);
+
+  return w;
+}
+
+/* ---------- 16. BOOT ---------- */
+init();
+</script>
+</body>
+</html>
